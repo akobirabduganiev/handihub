@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.email.EmailService;
 import tech.nuqta.handihub.email.EmailTemplateName;
+import tech.nuqta.handihub.exception.AppBadRequestException;
+import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.security.JwtService;
 import tech.nuqta.handihub.user.Token;
@@ -87,15 +89,14 @@ public class AuthenticationService {
     @Transactional
     public void activateAccount(String token) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(token)
-                // todo exception has to be defined
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+                .orElseThrow(() -> new AppBadRequestException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
             sendValidationEmail(savedToken.getUser());
-            throw new RuntimeException("Activation token has expired. A new token has been send to the same email address");
+            throw new AppBadRequestException("Activation token has expired. A new token has been send to the same email address");
         }
 
         var user = userRepository.findById(savedToken.getUser().getId())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new ItemNotFoundException("User not found"));
         user.setEnabled(true);
         userRepository.save(user);
 
@@ -105,11 +106,11 @@ public class AuthenticationService {
 
     private String generateAndSaveActivationToken(User user) {
         // Generate a token
-        String generatedToken = generateActivationCode(6);
+        String generatedToken = generateActivationCode(5);
         var token = Token.builder()
                 .token(generatedToken)
                 .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
                 .user(user)
                 .build();
         tokenRepository.save(token);

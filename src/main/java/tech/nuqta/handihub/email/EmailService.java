@@ -53,7 +53,7 @@ public class EmailService {
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom("info@nuqta.tech");
+        helper.setFrom("HandiHub Email Verification <info@nuqta.tech>");
         helper.setTo(to);
         helper.setSubject(subject);
 

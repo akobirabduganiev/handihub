@@ -9,10 +9,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import tech.nuqta.handihub.exception.ActivationTokenException;
-import tech.nuqta.handihub.exception.ItemNotFoundException;
-import tech.nuqta.handihub.exception.MessagingException;
-import tech.nuqta.handihub.exception.OperationNotPermittedException;
+import tech.nuqta.handihub.exception.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -81,6 +78,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ActivationTokenException.class)
     public ResponseEntity<ExceptionResponse> handleException(ActivationTokenException exp) {
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(
+                        ExceptionResponse.builder()
+                                .error(exp.getMessage())
+                                .errorCode(BAD_REQUEST.value())
+                                .timestamp(System.currentTimeMillis())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(AppBadRequestException.class)
+    public ResponseEntity<ExceptionResponse> handleException(AppBadRequestException exp) {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
