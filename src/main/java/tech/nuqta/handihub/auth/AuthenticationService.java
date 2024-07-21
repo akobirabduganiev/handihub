@@ -4,10 +4,8 @@ package tech.nuqta.handihub.auth;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,7 +76,6 @@ public class AuthenticationService {
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .roles(user.getRoles())
                 .firstName(user.getFirstname())
                 .lastName(user.getLastname())
                 .refreshToken(refreshToken)
@@ -86,8 +83,24 @@ public class AuthenticationService {
                 .build();
     }
 
+    public AuthenticationResponse refreshToken(String refreshToken) {
+        var claims = new HashMap<String, Object>();
+        var username = jwtService.extractUsername(refreshToken);
+        var user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new ItemNotFoundException("User not found"));
+        var jwtToken = jwtService.generateToken(claims, user);
+        return AuthenticationResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .firstName(user.getFirstname())
+                .lastName(user.getLastname())
+                .refreshToken(refreshToken)
+                .accessToken(jwtToken)
+                .build();
+    }
     @Transactional
-    public void activateAccount(String token) throws MessagingException {
+    public ResponseMessage activateAccount(String token) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new AppBadRequestException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
@@ -102,10 +115,10 @@ public class AuthenticationService {
 
         savedToken.setValidatedAt(LocalDateTime.now());
         tokenRepository.save(savedToken);
+        return new ResponseMessage("Account activated successfully");
     }
 
     private String generateAndSaveActivationToken(User user) {
-        // Generate a token
         String generatedToken = generateActivationCode(5);
         var token = Token.builder()
                 .token(generatedToken)
@@ -117,8 +130,8 @@ public class AuthenticationService {
 
         return generatedToken;
     }
-    @Async
-    public void sendValidationEmail(User user) throws MessagingException {
+
+    private void sendValidationEmail(User user) throws MessagingException {
         var newToken = generateAndSaveActivationToken(user);
 
         emailService.sendEmail(
@@ -128,7 +141,7 @@ public class AuthenticationService {
                 activationUrl,
                 newToken,
                 "Account activation"
-                );
+        );
     }
 
     private String generateActivationCode(int length) {
