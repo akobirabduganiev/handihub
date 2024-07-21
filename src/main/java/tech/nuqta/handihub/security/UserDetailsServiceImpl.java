@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.user.UserRepository;
 
 @Service
@@ -14,9 +15,9 @@ import tech.nuqta.handihub.user.UserRepository;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository repository;
     @Override
-    @Transactional
+    @Transactional()
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new ItemNotFoundException("User not found"));
     }
 }

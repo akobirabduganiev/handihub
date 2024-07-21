@@ -1,6 +1,5 @@
 package tech.nuqta.handihub.auth;
 
-
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,16 +33,15 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TokenRepository tokenRepository;
     private final RoleRepository roleRepository;
     private final EmailService emailService;
-    private final TokenRepository tokenRepository;
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
 
     public ResponseMessage register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName("USER")
-                // todo - better exception handling
                 .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
         var user = User.builder()
                 .firstname(request.getFirstname())
@@ -66,12 +64,12 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+        var user = (User) auth.getPrincipal();
         var claims = new HashMap<String, Object>();
-        var user = ((User) auth.getPrincipal());
         claims.put("fullName", user.getFullName());
 
-        var jwtToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
-        var refreshToken = jwtService.generateRefreshToken(claims, (User) auth.getPrincipal());
+        var jwtToken = jwtService.generateToken(claims, user);
+        var refreshToken = jwtService.generateRefreshToken(claims, user);
         return AuthenticationResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -84,11 +82,18 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse refreshToken(String refreshToken) {
-        var claims = new HashMap<String, Object>();
+        if (jwtService.isTokenExpired(refreshToken) || !jwtService.isRefreshToken(refreshToken)) {
+            throw new AppBadRequestException("Invalid refresh token");
+        }
+
         var username = jwtService.extractUsername(refreshToken);
         var user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new ItemNotFoundException("User not found"));
-        var jwtToken = jwtService.generateToken(claims, user);
+
+        var claims = new HashMap<String, Object>();
+        claims.put("fullName", user.getFullName());
+
+        var newAccessToken = jwtService.generateToken(claims, user);
         return AuthenticationResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -96,16 +101,18 @@ public class AuthenticationService {
                 .firstName(user.getFirstname())
                 .lastName(user.getLastname())
                 .refreshToken(refreshToken)
-                .accessToken(jwtToken)
+                .accessToken(newAccessToken)
                 .build();
     }
+
+
     @Transactional
     public ResponseMessage activateAccount(String token) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new AppBadRequestException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
             sendValidationEmail(savedToken.getUser());
-            throw new AppBadRequestException("Activation token has expired. A new token has been send to the same email address");
+            throw new AppBadRequestException("Activation token has expired. A new token has been sent to the same email address");
         }
 
         var user = userRepository.findById(savedToken.getUser().getId())

@@ -32,35 +32,27 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateRefreshToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
+    public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.put("token_type", "refresh");
         return buildToken(extraClaims, userDetails, jwtRefreshExpiration);
     }
-    public String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
+
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.put("token_type", "access");
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
-    private String buildToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails,
-            long expiration
-    ) {
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         var authorities = userDetails.getAuthorities()
-                .stream().
-                map(GrantedAuthority::getAuthority)
+                .stream()
+                .map(GrantedAuthority::getAuthority)
                 .toList();
-        return Jwts
-                .builder()
+        extraClaims.put("authorities", authorities);
+        return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("authorities", authorities)
                 .signWith(getSignInKey())
                 .compact();
     }
@@ -70,8 +62,13 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
+    }
+
+    public boolean isRefreshToken(String token) {
+        String tokenType = extractClaim(token, claims -> claims.get("token_type", String.class));
+        return "refresh".equals(tokenType);
     }
 
     private Date extractExpiration(String token) {
@@ -79,8 +76,7 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
+        return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
                 .parseClaimsJws(token)

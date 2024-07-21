@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.nuqta.handihub.common.ResponseMessage;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication")
 public class AuthenticationController {

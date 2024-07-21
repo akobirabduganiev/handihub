@@ -39,6 +39,34 @@ public class SetupDataLoader implements CommandLineRunner {
             user.setName("USER");
             roleRepository.save(user);
         }
+        if (userRepository.findAll().isEmpty()) {
+            var adminRole = roleRepository.findByName("ADMIN")
+                    .orElseThrow(() -> new IllegalStateException("ROLE ADMIN was not initiated"));
+            var superAdminRole = roleRepository.findByName("SUPER_ADMIN")
+                    .orElseThrow(() -> new IllegalStateException("ROLE SUPER_ADMIN was not initiated"));
+            var userRole = roleRepository.findByName("USER")
+                    .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
 
+            var admin = new User();
+            admin.setFirstname("Adminjon");
+            admin.setLastname("Adminbekov");
+            admin.setEmail("admin@handihub.uz");
+            admin.setPassword(passwordEncoder.encode("admin"));
+            admin.setRoles(List.of(adminRole, superAdminRole));
+            admin.setEnabled(true);
+            admin.setAccountLocked(false);
+            userRepository.save(admin);
+
+            var user = new User();
+            user.setFirstname("Userbek");
+            user.setLastname("Userjonov");
+            user.setEmail("user@handihub.uz");
+            user.setEnabled(true);
+            user.setAccountLocked(false);
+            user.setPassword(passwordEncoder.encode("user"));
+            user.setRoles(List.of(userRole));
+            userRepository.save(user);
+
+        }
     }
 }
