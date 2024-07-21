@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static jakarta.persistence.FetchType.EAGER;
 
 
 @Getter
@@ -56,7 +55,7 @@ public class User implements UserDetails, Principal {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles
                 .stream()
-                .map(r -> new SimpleGrantedAuthority(r.getName()))
+                .map(r -> new SimpleGrantedAuthority(r.getName().toString()))
                 .collect(Collectors.toList());
     }
     @Override
@@ -84,10 +83,6 @@ public class User implements UserDetails, Principal {
     @Override
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public String fullName() {
-        return getFirstname() + " " + getLastname();
     }
 
     @Override

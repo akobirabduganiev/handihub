@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.user.User;
 
 import java.time.LocalDateTime;
@@ -25,7 +26,8 @@ public class Role {
     @GeneratedValue
     private Long id;
     @Column(unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private RoleName name;
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<User> user;

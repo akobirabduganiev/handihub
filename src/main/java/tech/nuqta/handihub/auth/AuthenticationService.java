@@ -1,5 +1,6 @@
 package tech.nuqta.handihub.auth;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.email.EmailService;
 import tech.nuqta.handihub.email.EmailTemplateName;
+import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.exception.AppBadRequestException;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.role.RoleRepository;
@@ -41,7 +43,7 @@ public class AuthenticationService {
     private String activationUrl;
 
     public ResponseMessage register(RegistrationRequest request) throws MessagingException {
-        var userRole = roleRepository.findByName("USER")
+        var userRole = roleRepository.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
         var user = User.builder()
                 .firstname(request.getFirstname())
@@ -82,27 +84,30 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse refreshToken(String refreshToken) {
-        if (jwtService.isTokenExpired(refreshToken) || !jwtService.isRefreshToken(refreshToken)) {
-            throw new AppBadRequestException("Invalid refresh token");
-        }
+       try {
+           if (!jwtService.isRefreshToken(refreshToken)) {
+               throw new AppBadRequestException("Invalid refresh token");
+           }
+           var username = jwtService.extractUsername(refreshToken);
+           var user = userRepository.findByEmail(username)
+                   .orElseThrow(() -> new ItemNotFoundException("User not found"));
 
-        var username = jwtService.extractUsername(refreshToken);
-        var user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new ItemNotFoundException("User not found"));
+           var claims = new HashMap<String, Object>();
+           claims.put("fullName", user.getFullName());
 
-        var claims = new HashMap<String, Object>();
-        claims.put("fullName", user.getFullName());
-
-        var newAccessToken = jwtService.generateToken(claims, user);
-        return AuthenticationResponse.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .firstName(user.getFirstname())
-                .lastName(user.getLastname())
-                .refreshToken(refreshToken)
-                .accessToken(newAccessToken)
-                .build();
+           var newAccessToken = jwtService.generateToken(claims, user);
+           return AuthenticationResponse.builder()
+                   .id(user.getId())
+                   .fullName(user.getFullName())
+                   .email(user.getEmail())
+                   .firstName(user.getFirstname())
+                   .lastName(user.getLastname())
+                   .refreshToken(refreshToken)
+                   .accessToken(newAccessToken)
+                   .build();
+       }catch (ExpiredJwtException e) {
+           throw new AppBadRequestException("Refresh token has expired");
+       }
     }
 
 

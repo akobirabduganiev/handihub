@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.role.Role;
 import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.user.User;
@@ -27,32 +28,32 @@ public class SetupDataLoader implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (roleRepository.findAll().isEmpty()) {
+            var user = new Role();
+            user.setName(RoleName.ROLE_USER);
+            roleRepository.save(user);
+
             var admin = new Role();
-            admin.setName("ADMIN");
+            admin.setName(RoleName.ROLE_ADMIN);
             roleRepository.save(admin);
 
-            var superAdmin = new Role();
-            superAdmin.setName("SUPER_ADMIN");
-            roleRepository.save(superAdmin);
-
-            var user = new Role();
-            user.setName("USER");
-            roleRepository.save(user);
+            var vendor = new Role();
+            vendor.setName(RoleName.ROLE_VENDOR);
+            roleRepository.save(vendor);
         }
         if (userRepository.findAll().isEmpty()) {
-            var adminRole = roleRepository.findByName("ADMIN")
-                    .orElseThrow(() -> new IllegalStateException("ROLE ADMIN was not initiated"));
-            var superAdminRole = roleRepository.findByName("SUPER_ADMIN")
-                    .orElseThrow(() -> new IllegalStateException("ROLE SUPER_ADMIN was not initiated"));
-            var userRole = roleRepository.findByName("USER")
+            var userRole = roleRepository.findByName(RoleName.ROLE_USER)
                     .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
+            var adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).orElseThrow(
+                    () -> new IllegalStateException("ROLE ADMIN was not initiated"));
+            var vendorRole = roleRepository.findByName(RoleName.ROLE_VENDOR).orElseThrow(
+                    () -> new IllegalStateException("ROLE VENDOR was not initiated"));
 
             var admin = new User();
             admin.setFirstname("Adminjon");
             admin.setLastname("Adminbekov");
             admin.setEmail("admin@handihub.uz");
             admin.setPassword(passwordEncoder.encode("admin"));
-            admin.setRoles(List.of(adminRole, superAdminRole));
+            admin.setRoles(List.of(adminRole));
             admin.setEnabled(true);
             admin.setAccountLocked(false);
             userRepository.save(admin);
@@ -61,6 +62,7 @@ public class SetupDataLoader implements CommandLineRunner {
             user.setFirstname("Userbek");
             user.setLastname("Userjonov");
             user.setEmail("user@handihub.uz");
+            user.setRoles(List.of(userRole, vendorRole));
             user.setEnabled(true);
             user.setAccountLocked(false);
             user.setPassword(passwordEncoder.encode("user"));
