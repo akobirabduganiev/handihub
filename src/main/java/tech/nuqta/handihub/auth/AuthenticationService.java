@@ -17,10 +17,10 @@ import tech.nuqta.handihub.exception.AppBadRequestException;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.security.JwtService;
-import tech.nuqta.handihub.user.Token;
-import tech.nuqta.handihub.user.TokenRepository;
-import tech.nuqta.handihub.user.User;
-import tech.nuqta.handihub.user.UserRepository;
+import tech.nuqta.handihub.token.Token;
+import tech.nuqta.handihub.token.TokenRepository;
+import tech.nuqta.handihub.user.entity.User;
+import tech.nuqta.handihub.user.repository.UserRepository;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -44,7 +44,12 @@ public class AuthenticationService {
 
     public ResponseMessage register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName(RoleName.USER)
-                .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
+                .orElseThrow(() -> new AppBadRequestException("ROLE USER was not initiated"));
+
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(u -> {
+                    throw new AppBadRequestException("User with email " + request.getEmail() + " already exists");
+                });
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
@@ -66,7 +71,6 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
-        System.out.println("Thread: " + Thread.currentThread().getName());
         var user = (User) auth.getPrincipal();
         var claims = new HashMap<String, Object>();
         claims.put("fullName", user.getFullName());

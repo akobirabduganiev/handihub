@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.user;
+package tech.nuqta.handihub.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

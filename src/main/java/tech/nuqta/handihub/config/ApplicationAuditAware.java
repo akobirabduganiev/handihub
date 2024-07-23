@@ -4,7 +4,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import tech.nuqta.handihub.user.User;
+import tech.nuqta.handihub.user.entity.User;
 
 import java.util.Optional;
 

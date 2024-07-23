@@ -30,7 +30,8 @@ public class CategoryController {
     public ResponseEntity<ResponseMessage> createSubCategory(@RequestBody @Valid CategoryCreateRequest request) {
         return ResponseEntity.ok(categoryService.createSubCategory(request));
     }
-    @PostMapping("/update")
+
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ResponseMessage> updateCategory(@RequestBody @Valid CategoryUpdateRequest request) {
         return ResponseEntity.ok(categoryService.updateCategory(request));

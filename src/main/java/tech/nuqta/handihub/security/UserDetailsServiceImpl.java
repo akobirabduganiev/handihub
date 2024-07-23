@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
-import tech.nuqta.handihub.user.UserRepository;
+import tech.nuqta.handihub.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor

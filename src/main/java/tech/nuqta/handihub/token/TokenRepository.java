@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.user;
+package tech.nuqta.handihub.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

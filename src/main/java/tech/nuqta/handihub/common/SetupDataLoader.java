@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.role.Role;
 import tech.nuqta.handihub.role.RoleRepository;
-import tech.nuqta.handihub.user.User;
-import tech.nuqta.handihub.user.UserRepository;
+import tech.nuqta.handihub.user.entity.User;
+import tech.nuqta.handihub.user.repository.UserRepository;
 
 import java.util.List;
 

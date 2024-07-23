@@ -8,7 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tech.nuqta.handihub.enums.RoleName;
-import tech.nuqta.handihub.user.User;
+import tech.nuqta.handihub.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
