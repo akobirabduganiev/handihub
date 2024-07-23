@@ -90,10 +90,6 @@ jobs:
             rm -f /home/${{ secrets.SERVER_USER }}/app.jar
           fi
 
-      - name: Clean up old files
-        run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh ${ secrets.SERVER_USER }@${{ secrets.SERVER_HOST }} "find /home/${{ secrets.SERVER_USER }}/ -name '*.jar' -type f -delete"
-
       - name: SSH to Server and Run Jar
         uses: appleboy/ssh-action@v0.1.0
         with:
