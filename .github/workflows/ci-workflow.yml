@@ -74,13 +74,18 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           source: build/libs/*.jar
-          target: /home/${{ secrets.SERVER_USER }}/app.jar
+          target: /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
       - name: SSH to Server
         uses: appleboy/ssh-action@v0.1.0
         with:
@@ -88,12 +93,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            echo "Removing old app.jar if exists..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
-            rm -f /home/${{ secrets.SERVER_USER }}/app.jar || true
-            echo "Copying new app.jar file..."
-            scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app.jar /home/${{ secrets.SERVER_USER }}/
-            echo "Stopping any running app.jar process..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
-            pkill -f 'java -jar /home/${{ secrets.SERVER_USER }}/app.jar' || true
-            echo "Starting new app.jar process..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
-            nohup java -jar /home/${{ secrets.SERVER_USER }}/app.jar >> /home/${{ secrets.SERVER_USER }}/app.log 2>&1 &
-            echo "Deployment complete." >> /home/${{ secrets.SERVER_USER }}/deploy.log
+            echo "Removing old app.jar if exists..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
+            rm -f /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar || true
+            echo "Stopping any running app.jar process..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
+            pkill -f 'java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar' || true
+            echo "Starting new app.jar process..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
+            nohup java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar >> /home/${{ secrets.SERVER_USER }}/root/app.jar/app.log 2>&1 &
+            echo "Deployment complete." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
