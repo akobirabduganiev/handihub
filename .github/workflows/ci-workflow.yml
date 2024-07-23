@@ -13,12 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install PostgreSQL if not installed
+      - name: Install PostgreSQL
         run: |
-          if ! command -v psql > /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y postgresql postgresql-contrib
-          fi
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
 
       - name: Ensure PostgreSQL is running
         run: |
@@ -83,23 +81,19 @@ jobs:
     needs: build
 
     steps:
-      - name: Delete previous jar file if exists
-        run: |
-          if [ -f /home/${{ secrets.SERVER_USER }}/app.jar ]; then
-            echo "Removing old app.jar file..."
-            rm -f /home/${{ secrets.SERVER_USER }}/app.jar
-          fi
-
-      - name: SSH to Server and Run Jar
+      - name: SSH to Server
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            echo "Stopping any running app.jar process..."
-            pkill -f 'java -jar app.jar' || true
-            echo "Starting new app.jar process..."
-            nohup java -jar /home/${{ secrets.SERVER_USER }}/app.jar > /home/${{ secrets.SERVER_USER }}/app.log 2>&1 &
-            echo "Deployment complete."
-  
+            echo "Removing old app.jar if exists..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
+            rm -f /home/${{ secrets.SERVER_USER }}/app.jar || true
+            echo "Copying new app.jar file..."
+            scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app.jar /home/${{ secrets.SERVER_USER }}/
+            echo "Stopping any running app.jar process..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
+            pkill -f 'java -jar /home/${{ secrets.SERVER_USER }}/app.jar' || true
+            echo "Starting new app.jar process..." >> /home/${{ secrets.SERVER_USER }}/deploy.log
+            nohup java -jar /home/${{ secrets.SERVER_USER }}/app.jar >> /home/${{ secrets.SERVER_USER }}/app.log 2>&1 &
+            echo "Deployment complete." >> /home/${{ secrets.SERVER_USER }}/deploy.log
