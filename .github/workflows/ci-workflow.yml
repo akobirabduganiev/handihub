@@ -74,7 +74,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           source: build/libs/*.jar
-          target: /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/
+          target: /home/${{ secrets.SERVER_USER }}/root/app.jar
 
   deploy:
     runs-on: ubuntu-latest
@@ -93,10 +93,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            echo "Removing old app.jar if exists..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
-            rm -f /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar || true
-            echo "Stopping any running app.jar process..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
-            pkill -f 'java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar' || true
-            echo "Starting new app.jar process..." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
-            nohup java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar/libs/*.jar >> /home/${{ secrets.SERVER_USER }}/root/app.jar/app.log 2>&1 &
-            echo "Deployment complete." >> /home/${{ secrets.SERVER_USER }}/root/app.jar/deploy.log
+            echo "Stopping any running app.jar process..." 
+            pkill -f 'java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar' || true
+            echo "Starting new app.jar process..." 
+            nohup java -jar /home/${{ secrets.SERVER_USER }}/root/app.jar &
