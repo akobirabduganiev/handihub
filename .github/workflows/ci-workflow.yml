@@ -49,21 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup-postgres
 
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: handihub
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: root
-        options: >
-          --health-cmd="pg_isready -U postgres -d handihub"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -76,17 +61,6 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for i in {1..10}; do
-            if pg_isready -h localhost -p 5432 -U postgres; then
-              echo "PostgreSQL is ready"
-              break
-            fi
-            echo "Waiting for PostgreSQL..."
-            sleep 5
-          done
 
       - name: Cache Gradle packages
         uses: actions/cache@v2
