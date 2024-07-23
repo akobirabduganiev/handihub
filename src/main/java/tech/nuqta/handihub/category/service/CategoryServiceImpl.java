@@ -22,14 +22,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ResponseMessage createCategory(CategoryCreateRequest request) {
-        categoryRepository.findByName(request.getName())
-                .ifPresent(categoryEntity -> {
-                    throw new AppBadRequestException("Category with name " + request.getName() + " already exists");
-                });
-        var entity = new CategoryEntity();
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
-        categoryRepository.save(entity);
+        checkIfCategoryNameExists(request.getName());
+        createAndSaveEntity(request, null);
         return new ResponseMessage("Category created successfully");
     }
 
@@ -37,17 +31,11 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseMessage createSubCategory(CategoryCreateRequest request) {
         var parentCategory = categoryRepository.findById(request.getParentCategoryId())
                 .orElseThrow(() -> new AppBadRequestException("Parent category not found"));
-        categoryRepository.findByName(request.getName())
-                .ifPresent(categoryEntity -> {
-                    throw new AppBadRequestException("Category with name " + request.getName() + " already exists");
-                });
-        var entity = new CategoryEntity();
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
-        entity.setParentCategory(parentCategory);
-        categoryRepository.save(entity);
+        checkIfCategoryNameExists(request.getName());
+        createAndSaveEntity(request, parentCategory);
         return new ResponseMessage("Sub category created successfully");
     }
+
 
     @Override
     public CategoryDto getCategory(Long id) {
@@ -68,6 +56,8 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseMessage updateCategory(CategoryUpdateRequest request) {
         var entity = categoryRepository.findById(request.getId())
                 .orElseThrow(() -> new AppBadRequestException("Category not found"));
+        checkIfCategoryNameExists(request.getName());
+
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
         entity.setParentCategory(request.getParentCategoryId() != null ?
@@ -75,5 +65,29 @@ public class CategoryServiceImpl implements CategoryService {
                         .orElseThrow(() -> new AppBadRequestException("Parent category not found")) : null);
         categoryRepository.save(entity);
         return new ResponseMessage("Category updated successfully");
+    }
+
+    @Override
+    public ResponseMessage deleteCategory(Long id) {
+        var entity = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppBadRequestException("Category not found"));
+        entity.setIsDeleted(true);
+        categoryRepository.save(entity);
+        return new ResponseMessage("Category deleted successfully");
+    }
+
+    private void checkIfCategoryNameExists(String categoryName){
+        categoryRepository.findByName(categoryName)
+                .ifPresent(categoryEntity -> {
+                    throw new AppBadRequestException("Category with name " + categoryName + " already exists");
+                });
+    }
+
+    private void createAndSaveEntity(CategoryCreateRequest request, CategoryEntity parentCategory){
+        var entity = new CategoryEntity();
+        entity.setName(request.getName());
+        entity.setDescription(request.getDescription());
+        entity.setParentCategory(parentCategory);
+        categoryRepository.save(entity);
     }
 }

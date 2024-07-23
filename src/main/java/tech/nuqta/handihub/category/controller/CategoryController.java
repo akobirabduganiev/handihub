@@ -35,6 +35,13 @@ public class CategoryController {
     public ResponseEntity<ResponseMessage> updateCategory(@RequestBody @Valid CategoryUpdateRequest request) {
         return ResponseEntity.ok(categoryService.updateCategory(request));
     }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ResponseMessage> deleteCategory(@RequestParam Long id) {
+        return ResponseEntity.ok(categoryService.deleteCategory(id));
+    }
+
     @GetMapping("/get")
     public ResponseEntity<CategoryDto> getCategory(@RequestParam Long id) {
         return ResponseEntity.ok(categoryService.getCategory(id));
