@@ -53,6 +53,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+          sudo systemctl start postgresql
+          sudo systemctl enable postgresql
+          sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = 'handihub'" | grep -q 1 || sudo -u postgres psql -c "CREATE DATABASE handihub"
+          sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'root'"
+
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
