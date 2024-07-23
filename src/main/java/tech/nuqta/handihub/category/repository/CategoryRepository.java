@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import tech.nuqta.handihub.category.entity.CategoryEntity;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
     @Transactional
     @Query("SELECT c FROM CategoryEntity c WHERE c.isDeleted = false AND c.name = :name")
-    Optional<CategoryEntity> findByName(String name);
+    Optional<CategoryEntity> findByName(@Param("name") String name);
 
     @Transactional
     @Query("SELECT c FROM CategoryEntity c WHERE c.isDeleted = false AND c.parentCategory IS NULL")

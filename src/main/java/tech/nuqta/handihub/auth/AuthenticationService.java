@@ -66,6 +66,7 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+        System.out.println("Thread: " + Thread.currentThread().getName());
         var user = (User) auth.getPrincipal();
         var claims = new HashMap<String, Object>();
         claims.put("fullName", user.getFullName());

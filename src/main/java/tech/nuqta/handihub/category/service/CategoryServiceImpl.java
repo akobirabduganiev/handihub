@@ -1,6 +1,9 @@
 package tech.nuqta.handihub.category.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import tech.nuqta.handihub.category.dto.CategoryDto;
@@ -21,13 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseMessage createCategory(CategoryCreateRequest request) {
         checkIfCategoryNameExists(request.getName());
         createAndSaveEntity(request, null);
         return new ResponseMessage("Category created successfully");
     }
-
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseMessage createSubCategory(CategoryCreateRequest request) {
         var parentCategory = categoryRepository.findById(request.getParentCategoryId())
                 .orElseThrow(() -> new AppBadRequestException("Parent category not found"));
@@ -36,14 +40,16 @@ public class CategoryServiceImpl implements CategoryService {
         return new ResponseMessage("Sub category created successfully");
     }
 
-
     @Override
+    @Cacheable("categories")
     public CategoryDto getCategory(Long id) {
         var entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new AppBadRequestException("Category not found"));
         return CategoryMapper.toDto(entity);
     }
 
+    @Override
+    @Cacheable("categories")
     public List<CategoryDto> getCategories() {
         Sort sort = Sort.by(Sort.Direction.ASC, "name");
         List<CategoryEntity> entities = categoryRepository.findByParentCategoryIsNull(sort);
@@ -53,6 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseMessage updateCategory(CategoryUpdateRequest request) {
         var entity = categoryRepository.findById(request.getId())
                 .orElseThrow(() -> new AppBadRequestException("Category not found"));
@@ -68,6 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseMessage deleteCategory(Long id) {
         var entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new AppBadRequestException("Category not found"));
