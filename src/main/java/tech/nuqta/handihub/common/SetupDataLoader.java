@@ -29,23 +29,23 @@ public class SetupDataLoader implements CommandLineRunner {
     public void run(String... args) {
         if (roleRepository.findAll().isEmpty()) {
             var user = new Role();
-            user.setName(RoleName.ROLE_USER);
+            user.setName(RoleName.USER);
             roleRepository.save(user);
 
             var admin = new Role();
-            admin.setName(RoleName.ROLE_ADMIN);
+            admin.setName(RoleName.ADMIN);
             roleRepository.save(admin);
 
             var vendor = new Role();
-            vendor.setName(RoleName.ROLE_VENDOR);
+            vendor.setName(RoleName.VENDOR);
             roleRepository.save(vendor);
         }
         if (userRepository.findAll().isEmpty()) {
-            var userRole = roleRepository.findByName(RoleName.ROLE_USER)
+            var userRole = roleRepository.findByName(RoleName.USER)
                     .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
-            var adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).orElseThrow(
+            var adminRole = roleRepository.findByName(RoleName.ADMIN).orElseThrow(
                     () -> new IllegalStateException("ROLE ADMIN was not initiated"));
-            var vendorRole = roleRepository.findByName(RoleName.ROLE_VENDOR).orElseThrow(
+            var vendorRole = roleRepository.findByName(RoleName.VENDOR).orElseThrow(
                     () -> new IllegalStateException("ROLE VENDOR was not initiated"));
 
             var admin = new User();

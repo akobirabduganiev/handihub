@@ -43,7 +43,7 @@ public class AuthenticationService {
     private String activationUrl;
 
     public ResponseMessage register(RegistrationRequest request) throws MessagingException {
-        var userRole = roleRepository.findByName(RoleName.ROLE_USER)
+        var userRole = roleRepository.findByName(RoleName.USER)
                 .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
         var user = User.builder()
                 .firstname(request.getFirstname())
@@ -113,7 +113,7 @@ public class AuthenticationService {
 
     @Transactional
     public ResponseMessage activateAccount(String token) throws MessagingException {
-        Token savedToken = tokenRepository.findByToken(token)
+        var savedToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new AppBadRequestException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
             sendValidationEmail(savedToken.getUser());
@@ -131,7 +131,7 @@ public class AuthenticationService {
     }
 
     private String generateAndSaveActivationToken(User user) {
-        String generatedToken = generateActivationCode(5);
+        String generatedToken = generateActivationCode(6);
         var token = Token.builder()
                 .token(generatedToken)
                 .createdAt(LocalDateTime.now())
@@ -157,10 +157,11 @@ public class AuthenticationService {
     }
 
     private String generateActivationCode(int length) {
-        String characters = "0123456789";
-        StringBuilder codeBuilder = new StringBuilder();
+        var characters = "0123456789";
+        var codeBuilder = new StringBuilder();
 
-        SecureRandom secureRandom = new SecureRandom();
+
+        var secureRandom = new SecureRandom();
 
         for (int i = 0; i < length; i++) {
             int randomIndex = secureRandom.nextInt(characters.length());
