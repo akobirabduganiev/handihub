@@ -20,12 +20,23 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class represents a filter that allows filtering and processing of JWT tokens in each request.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Performs the filter logic for authentication and authorization.
+     *
+     * @param request      the HTTP servlet request
+     * @param response     the HTTP servlet response
+     * @param filterChain the filter chain for executing subsequent filters
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -76,6 +87,13 @@ public class JwtFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Checks if the given request should not be filtered.
+     *
+     * @param request The HttpServletRequest object representing the current request.
+     * @return true if the request should not be filtered, false otherwise.
+     * @throws ServletException if an error occurs while filtering the request.
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         List<String> pathsToSkip = Arrays.asList(
@@ -95,6 +113,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
         return pathsToSkip.stream().anyMatch(path -> pathMatcher.match(path, request.getServletPath()));
     }
+    /**
+     * Writes JSON response with the given status and error message to the HttpServletResponse object.
+     *
+     * @param response     the HttpServletResponse object to write the response to
+     * @param status       the HTTP status code for the response
+     * @param errorMessage the error message to include in the response
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void writeJsonResponse(HttpServletResponse response, int status, String errorMessage) throws IOException{
         response.setStatus(status);
         response.setContentType("application/json");

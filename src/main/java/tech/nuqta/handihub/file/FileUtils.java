@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * This class contains utility methods for file operations.
+ */
 @Slf4j
 public class FileUtils {
 
@@ -19,7 +22,7 @@ public class FileUtils {
             Path filePath = new File(fileUrl).toPath();
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            log.warn("Nou file found in the path {}", fileUrl);
+            log.warn("No file found in the path {}", fileUrl);
         }
         return null;
     }

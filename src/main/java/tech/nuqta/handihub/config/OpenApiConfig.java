@@ -10,6 +10,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 
+/**
+ * The OpenApiConfig class specifies the OpenAPI configuration for the HandiHub API.
+ * It includes information such as the API contact details, description, version, licensing, terms of service,
+ * servers, and security requirements.
+ */
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
@@ -33,7 +38,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 @Server(
                         description = "PROD ENV",
-                        url = "https://nuqta.tech"
+                        url = "http://5.8.64.22:8080/"
                 )
         },
         security = {

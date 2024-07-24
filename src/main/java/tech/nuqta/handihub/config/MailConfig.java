@@ -5,14 +5,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import java.util.Properties;
-
+/**
+ * The MailConfig class provides configuration for a JavaMailSender bean used for sending emails.
+ */
 @Configuration
 public class MailConfig {
 
     @Bean
     public JavaMailSender getJavaMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        var mailSender = new JavaMailSenderImpl();
 
         // Set the email server details
         mailSender.setHost("mail.nuqta.tech");
@@ -21,7 +22,7 @@ public class MailConfig {
         mailSender.setUsername("info@nuqta.tech");
         mailSender.setPassword("akobir2003");
 
-        Properties props = mailSender.getJavaMailProperties();
+        var props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");

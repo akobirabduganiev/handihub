@@ -18,12 +18,27 @@ public class SetupDataLoader implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Sets up initial data in the application by creating default roles and users if they don't already exist.
+     *
+     * @param userRepository   the user repository
+     * @param roleRepository   the role repository
+     * @param passwordEncoder  the password encoder
+     */
     public SetupDataLoader(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * This method is responsible for running the setup data loading process.
+     * It checks if the role and user repositories are empty, and if so, it creates and saves initial role and user entities.
+     * The roles "USER", "ADMIN" and "VENDOR" are created and saved in the role repository.
+     * Then, the user "Adminjon" and "Userbek" are created and saved in the user repository, with their respective roles.
+     *
+     * @param args The command line arguments passed to the application
+     */
     @Override
     @Transactional
     public void run(String... args) {

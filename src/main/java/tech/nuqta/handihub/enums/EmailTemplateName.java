@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.email;
+package tech.nuqta.handihub.enums;
 
 import lombok.Getter;
 

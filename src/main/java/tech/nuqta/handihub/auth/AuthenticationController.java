@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.nuqta.handihub.common.ResponseMessage;
 
+/**
+ * The AuthenticationController class handles the authentication-related APIs.
+ * It provides methods for user registration, user authentication, account activation, and token refreshing.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor

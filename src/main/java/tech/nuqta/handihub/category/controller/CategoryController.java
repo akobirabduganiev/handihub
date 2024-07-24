@@ -13,6 +13,20 @@ import tech.nuqta.handihub.common.ResponseMessage;
 
 import java.util.List;
 
+/**
+ * The CategoryController class is responsible for handling HTTP requests related to categories.
+ * It provides RESTful API endpoints for creating, updating, deleting, and retrieving category information.
+ * <p>
+ * This class requires an instance of the CategoryService interface for performing category-related operations.
+ * <p>
+ * The CategoryController class has the following API endpoints:
+ * - POST /api/v1/categories/create: Creates a new category.
+ * - POST /api/v1/categories/create-sub-category: Creates a new sub-category.
+ * - PUT /api/v1/categories/update: Updates an existing category.
+ * - DELETE /api/v1/categories/delete: Deletes a category by its ID.
+ * - GET /api/v1/categories/get: Retrieves a category by its ID.
+ * - GET /api/v1/categories/get-all: Retrieves all categories.
+ */
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor

@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.user.repository.UserRepository;
 
+/**
+ * Implementation of the UserDetailsService interface for loading user details based on the username.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {

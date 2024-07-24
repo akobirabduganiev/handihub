@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import tech.nuqta.handihub.enums.EmailTemplateName;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,10 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.mail.javamail.MimeMessageHelper.MULTIPART_MODE_MIXED;
 
+/**
+ * The EmailService class is responsible for sending emails using the JavaMailSender and SpringTemplateEngine.
+ * It provides a method for sending emails asynchronously.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor

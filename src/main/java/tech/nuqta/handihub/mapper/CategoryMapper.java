@@ -6,6 +6,10 @@ import tech.nuqta.handihub.category.entity.CategoryEntity;
 
 import java.util.stream.Collectors;
 
+
+/**
+ * The CategoryMapper class provides static methods to map between CategoryEntity and CategoryDto objects.
+ */
 public class CategoryMapper {
 
     public static CategoryDto toDto(CategoryEntity entity) {

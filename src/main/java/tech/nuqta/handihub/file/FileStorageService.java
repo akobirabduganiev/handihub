@@ -16,6 +16,10 @@ import java.nio.file.Paths;
 import static java.io.File.separator;
 import static java.lang.System.currentTimeMillis;
 
+/**
+ * The FileStorageService class is responsible for storing files in the specified file upload path.
+ * It provides a method for saving a file and a helper method for extracting file extensions.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -26,8 +30,7 @@ public class FileStorageService {
 
     public String saveFile(
             @Nonnull MultipartFile sourceFile,
-            @Nonnull Integer bookId,
-            @Nonnull Integer userId
+            @Nonnull Long userId
     ) {
         final String fileUploadSubPath = "users" + separator + userId;
         return uploadFile(sourceFile, fileUploadSubPath);
@@ -43,7 +46,7 @@ public class FileStorageService {
         if (!targetFolder.exists()) {
             boolean folderCreated = targetFolder.mkdirs();
             if (!folderCreated) {
-                log.warn("Failed to create the target folder: " + targetFolder);
+                log.warn("Failed to create the target folder: {}", targetFolder);
                 return null;
             }
         }
@@ -52,7 +55,7 @@ public class FileStorageService {
         Path targetPath = Paths.get(targetFilePath);
         try {
             Files.write(targetPath, sourceFile.getBytes());
-            log.info("File saved to: " + targetFilePath);
+            log.info("File saved to: {}", targetFilePath);
             return targetFilePath;
         } catch (IOException e) {
             log.error("File was not saved", e);

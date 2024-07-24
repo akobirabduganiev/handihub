@@ -8,6 +8,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * The RegistrationRequest class represents a user registration request.
+ * It contains the user's first name, last name, email, and password.
+ */
 @Getter
 @Setter
 @Builder

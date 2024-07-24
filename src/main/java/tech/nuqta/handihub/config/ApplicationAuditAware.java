@@ -8,6 +8,10 @@ import tech.nuqta.handihub.user.entity.User;
 
 import java.util.Optional;
 
+/**
+ * The ApplicationAuditAware class is responsible for providing the current auditor for auditing purposes.
+ * It implements the AuditorAware interface and specifies the type Long as the auditor type.
+ */
 public class ApplicationAuditAware implements AuditorAware<Long> {
     @Override
     public Optional<Long> getCurrentAuditor() {
