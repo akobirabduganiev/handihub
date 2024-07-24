@@ -27,6 +27,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * The AuthenticationService class provides methods for user registration, authentication, and account activation.
+ * It uses various dependencies such as UserRepository, PasswordEncoder, JwtService, AuthenticationManager, TokenRepository, RoleRepository, and EmailService.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -42,6 +46,13 @@ public class AuthenticationService {
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
 
+    /**
+     * Registers a new user.
+     *
+     * @param request The registration request containing user details.
+     * @return A ResponseMessage indicating the success of the registration process.
+     * @throws MessagingException if there is an error sending the validation email.
+     */
     public ResponseMessage register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName(RoleName.USER)
                 .orElseThrow(() -> new AppBadRequestException("ROLE USER was not initiated"));
@@ -64,6 +75,12 @@ public class AuthenticationService {
         return new ResponseMessage("User registered successfully. Please check your email for activation link");
     }
 
+    /**
+     * Authenticates a user using the provided authentication request.
+     *
+     * @param request The authentication request with email and password credentials.
+     * @return An {@link AuthenticationResponse} object containing the user details and access tokens.
+     */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -88,6 +105,15 @@ public class AuthenticationService {
                 .build();
     }
 
+    /**
+     * Refreshes the access token using the provided refresh token.
+     *
+     * @param refreshToken The refresh token to refresh the access token.
+     * @return The authentication response with the refreshed access token.
+     * @throws AppBadRequestException If the refresh token is invalid.
+     * @throws ItemNotFoundException If the user corresponding to the username extracted from the refresh token is not found.
+     * @throws AppBadRequestException If the refresh token has expired.
+     */
     public AuthenticationResponse refreshToken(String refreshToken) {
        try {
            if (!jwtService.isRefreshToken(refreshToken)) {
@@ -116,6 +142,15 @@ public class AuthenticationService {
     }
 
 
+    /**
+     * Activates the account using the provided token.
+     *
+     * @param token the activation token
+     * @return the response message indicating the result of the activation process
+     * @throws MessagingException if an error occurs while sending the validation email
+     * @throws AppBadRequestException if the token is invalid or has expired
+     * @throws ItemNotFoundException if the user associated with the token is not found
+     */
     @Transactional
     public ResponseMessage activateAccount(String token) throws MessagingException {
         var savedToken = tokenRepository.findByToken(token)
@@ -135,6 +170,12 @@ public class AuthenticationService {
         return new ResponseMessage("Account activated successfully");
     }
 
+    /**
+     * Generates an activation token for the given user and saves it in the token repository.
+     *
+     * @param user The user for whom the activation token is being generated and saved.
+     * @return The generated activation token.
+     */
     private String generateAndSaveActivationToken(User user) {
         String generatedToken = generateActivationCode(6);
         var token = Token.builder()
@@ -148,6 +189,12 @@ public class AuthenticationService {
         return generatedToken;
     }
 
+    /**
+     * Sends a validation email to the user.
+     *
+     * @param user The user object to whom the validation email will be sent
+     * @throws MessagingException If an error occurs while sending the email
+     */
     private void sendValidationEmail(User user) throws MessagingException {
         var newToken = generateAndSaveActivationToken(user);
 
@@ -161,6 +208,12 @@ public class AuthenticationService {
         );
     }
 
+    /**
+     * Generates an activation code with the specified length.
+     *
+     * @param length the length of the activation code
+     * @return the generated activation code as a string
+     */
     private String generateActivationCode(int length) {
         var characters = "0123456789";
         var codeBuilder = new StringBuilder();

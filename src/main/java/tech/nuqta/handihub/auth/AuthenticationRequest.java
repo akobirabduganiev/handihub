@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents an authentication request object.
+ */
 @Getter
 @Setter
 @Builder

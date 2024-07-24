@@ -50,6 +50,4 @@ public class AuthenticationController {
         authorization = authorization.substring(7);
         return ResponseEntity.ok(service.refreshToken(authorization));
     }
-
-
 }

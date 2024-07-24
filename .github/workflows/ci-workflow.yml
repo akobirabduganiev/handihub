@@ -3,7 +3,7 @@ name: Build and Deploy Spring Boot App
 on:
   push:
     branches:
-      - main  # Adjust if your default branch is different
+      - prod  # Adjust if your default branch is different
 
 jobs:
   setup-postgres:

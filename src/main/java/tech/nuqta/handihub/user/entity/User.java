@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tech.nuqta.handihub.enums.Gender;
 import tech.nuqta.handihub.role.Role;
 
 import java.security.Principal;
@@ -41,8 +42,10 @@ public class User implements UserDetails, Principal {
     @Column(unique = true)
     private String email;
     private String password;
-    private Boolean isDeleted = false;
-    private Boolean isVendor = false;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    private boolean isDeleted = false;
+    private boolean isVendor = false;
     private boolean accountLocked;
     private boolean enabled;
     @ManyToMany(fetch = FetchType.EAGER)
