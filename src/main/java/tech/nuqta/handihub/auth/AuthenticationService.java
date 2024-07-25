@@ -67,7 +67,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
-                .email(request.getEmail())
+                .email(request.getEmail().toLowerCase())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountLocked(false)
                 .enabled(false)
@@ -85,19 +85,15 @@ public class AuthenticationService {
      * @return An {@link AuthenticationResponse} object containing the user details and access tokens.
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        Authentication auth = null;
-        try {
-            auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
-                    )
-            );
-        } catch (InternalAuthenticationServiceException e) {
-            throw new ItemNotFoundException("User not found");
-        } catch (AuthenticationException e) {
-            throw new AppBadRequestException("Invalid credentials");
-        }
+        userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppBadRequestException("Login failed. Invalid email or password"));
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
         var user = (User) auth.getPrincipal();
         var claims = new HashMap<String, Object>();
         claims.put("fullName", user.getFullName());
@@ -121,34 +117,34 @@ public class AuthenticationService {
      * @param refreshToken The refresh token to refresh the access token.
      * @return The authentication response with the refreshed access token.
      * @throws AppBadRequestException If the refresh token is invalid.
-     * @throws ItemNotFoundException If the user corresponding to the username extracted from the refresh token is not found.
+     * @throws ItemNotFoundException  If the user corresponding to the username extracted from the refresh token is not found.
      * @throws AppBadRequestException If the refresh token has expired.
      */
     public AuthenticationResponse refreshToken(String refreshToken) {
-       try {
-           if (!jwtService.isRefreshToken(refreshToken)) {
-               throw new AppBadRequestException("Invalid refresh token");
-           }
-           var username = jwtService.extractUsername(refreshToken);
-           var user = userRepository.findByEmail(username)
-                   .orElseThrow(() -> new ItemNotFoundException("User not found"));
+        try {
+            if (!jwtService.isRefreshToken(refreshToken)) {
+                throw new AppBadRequestException("Invalid refresh token");
+            }
+            var username = jwtService.extractUsername(refreshToken);
+            var user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new ItemNotFoundException("User not found"));
 
-           var claims = new HashMap<String, Object>();
-           claims.put("fullName", user.getFullName());
+            var claims = new HashMap<String, Object>();
+            claims.put("fullName", user.getFullName());
 
-           var newAccessToken = jwtService.generateToken(claims, user);
-           return AuthenticationResponse.builder()
-                   .id(user.getId())
-                   .fullName(user.getFullName())
-                   .email(user.getEmail())
-                   .firstName(user.getFirstname())
-                   .lastName(user.getLastname())
-                   .refreshToken(refreshToken)
-                   .accessToken(newAccessToken)
-                   .build();
-       }catch (ExpiredJwtException e) {
-           throw new AppBadRequestException("Refresh token has expired");
-       }
+            var newAccessToken = jwtService.generateToken(claims, user);
+            return AuthenticationResponse.builder()
+                    .id(user.getId())
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .firstName(user.getFirstname())
+                    .lastName(user.getLastname())
+                    .refreshToken(refreshToken)
+                    .accessToken(newAccessToken)
+                    .build();
+        } catch (ExpiredJwtException e) {
+            throw new AppBadRequestException("Refresh token has expired");
+        }
     }
 
 
@@ -157,9 +153,9 @@ public class AuthenticationService {
      *
      * @param token the activation token
      * @return the response message indicating the result of the activation process
-     * @throws MessagingException if an error occurs while sending the validation email
+     * @throws MessagingException     if an error occurs while sending the validation email
      * @throws AppBadRequestException if the token is invalid or has expired
-     * @throws ItemNotFoundException if the user associated with the token is not found
+     * @throws ItemNotFoundException  if the user associated with the token is not found
      */
     @Transactional
     public ResponseMessage activateAccount(String token) throws MessagingException {

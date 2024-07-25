@@ -1,7 +1,7 @@
 package tech.nuqta.handihub.user.dto.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,9 +20,7 @@ public class UserUpdateRequest {
     @NotNull(message = "Last name is required")
     @Size(min = 2, max = 100, message = "Last name must be between 2 and 100 characters")
     private String lastname;
-    @NotNull(message = "Email is required")
-    @Email(message = "Email must be valid")
-    private String email;
+    @Past(message = "Date of birth must be in the past")
     private LocalDate dateOfBirth;
     private Gender gender;
 

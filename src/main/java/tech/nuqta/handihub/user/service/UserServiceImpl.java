@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
@@ -15,6 +17,7 @@ import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.exception.AppBadRequestException;
 import tech.nuqta.handihub.mapper.UserMapper;
 import tech.nuqta.handihub.role.Role;
+import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.user.dto.UserDto;
 import tech.nuqta.handihub.user.dto.request.UserPasswordUpdateRequest;
 import tech.nuqta.handihub.user.dto.request.UserUpdateRequest;
@@ -32,7 +35,9 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Updates the user information with the provided details.
@@ -42,11 +47,15 @@ public class UserServiceImpl implements UserService {
      * @throws AppBadRequestException If the user specified in the request is not found.
      */
     @Override
-    public ResponseMessage updateUser(UserUpdateRequest request) {
+    public ResponseMessage updateUser(UserUpdateRequest request, Authentication connectedUser) {
+        var user = ((User) connectedUser.getPrincipal());
         var userToUpdate = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
+        if (!user.getId().equals(userToUpdate.getId()) &&
+                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+            throw new AppBadRequestException("You are not authorized to update this user");
+        }
         userToUpdate.setFirstname(request.getFirstname());
         userToUpdate.setLastname(request.getLastname());
-        userToUpdate.setEmail(request.getEmail());
         Optional.ofNullable(request.getDateOfBirth()).ifPresent(userToUpdate::setDateOfBirth);
         Optional.ofNullable(request.getGender()).ifPresent(userToUpdate::setGender);
         userRepository.save(userToUpdate);
@@ -61,9 +70,15 @@ public class UserServiceImpl implements UserService {
      * @return A ResponseMessage indicating the result of the operation.
      */
     @Override
-    public ResponseMessage deleteUser(Long id) {
+    public ResponseMessage deleteUser(Long id, Authentication connectedUser) {
+        var user = ((User) connectedUser.getPrincipal());
         var foundUser = getById(id);
+        if (!user.getId().equals(foundUser.getId()) &&
+                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+            throw new AppBadRequestException("You are not authorized to delete this user");
+        }
         foundUser.setDeleted(true);
+        foundUser.setEnabled(false);
         userRepository.save(foundUser);
         log.info("User with id: {} deleted", id);
         return new ResponseMessage("User deleted successfully");
@@ -76,9 +91,14 @@ public class UserServiceImpl implements UserService {
      * @return A ResponseMessage object containing the retrieved user and a success message.
      */
     @Override
-    public ResponseMessage getUser(Long id) {
-        var user = getById(id);
-        return new ResponseMessage(user, "User retrieved successfully");
+    public ResponseMessage getUser(Long id, Authentication connectedUser) {
+        var user = ((User) connectedUser.getPrincipal());
+        var retrievedUser = getById(id);
+        if (!user.getId().equals(retrievedUser.getId()) &&
+                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+            throw new AppBadRequestException("You are not authorized to retrieve this user");
+        }
+        return new ResponseMessage(UserMapper.toDto(retrievedUser), "User retrieved successfully");
     }
 
     /**
@@ -111,15 +131,28 @@ public class UserServiceImpl implements UserService {
      * @return a {@code ResponseMessage} indicating that the user is now a vendor
      */
     @Override
-    public ResponseMessage makeVendor(Long id) {
-        var user = getById(id);
-        user.setVendor(true);
-        var vendor = new Role();
-        vendor.setName(RoleName.VENDOR);
-        user.getRoles().add(vendor);
-        userRepository.save(user);
-        log.info("User with id: {} is now a vendor", id);
-        return new ResponseMessage("User is now a vendor");
+    public ResponseMessage makeVendor(Long id, Authentication connectedUser) {
+        var user = ((User) connectedUser.getPrincipal());
+        var currentUser = getById(id);
+        if (!user.getId().equals(currentUser.getId()) &&
+                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+            throw new AppBadRequestException("You are not authorized to make this user a vendor");
+        }
+        currentUser.setVendor(true);
+
+        var vendor = roleRepository.findByName(RoleName.VENDOR).orElseThrow(() -> new AppBadRequestException("Role not found"));
+
+        // Only add the vendor role if the current user doesn't already have it
+        if (currentUser.getRoles().stream().noneMatch(role -> role.getId().equals(vendor.getId()))) { // ensure you compare with the relevant unique identifier
+            currentUser.getRoles().add(vendor);
+            userRepository.save(currentUser);
+            log.info("User with id: {} is now a vendor", id);
+            return new ResponseMessage("User is now a vendor");
+        } else {
+            log.info("User with id: {} is already a vendor", id);
+            return new ResponseMessage("User is already a vendor");
+        }
+
     }
 
     /**
@@ -130,36 +163,35 @@ public class UserServiceImpl implements UserService {
      * @throws AppBadRequestException if the user is not found
      */
     @Override
-    public ResponseMessage updatePassword(UserPasswordUpdateRequest request) {
-        var user = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
+    public ResponseMessage updatePassword(UserPasswordUpdateRequest request, Authentication connectedUser) {
+        var user = ((User) connectedUser.getPrincipal());
+        var currentUser = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
+        if (!user.getId().equals(currentUser.getId())) {
+            throw new AppBadRequestException("You are not authorized to update this user's password");
+        }
 
-        authenticateAndUpdateUserPassword(request.getOldPassword(), request.getNewPassword(), user);
-
-        userRepository.save(user);
+        authenticateAndUpdateUserPassword(request.getOldPassword(), request.getNewPassword(), currentUser);
         log.info("User with id: {} password updated", request.getId());
         return new ResponseMessage("Password updated successfully");
     }
 
     /**
-     * Authenticates the user with the given old password, then updates the user's password with the new password.
+     * Authenticates the user using the given old password and updates the user's password to the given new password.
      *
      * @param oldPassword The old password of the user.
-     * @param newPassword The new password to set for the user.
-     * @param user User object representing the user.
-     * @throws AppBadRequestException If the old password is incorrect.
+     * @param newPassword The new password to update for the user.
+     * @param user The user for whom the password needs to be updated.
      */
     private void authenticateAndUpdateUserPassword(String oldPassword, String newPassword, User user) {
-        var auth = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
                         oldPassword
                 )
         );
-        if (auth.isAuthenticated()) {
-            user.setPassword(newPassword);
-        } else {
-            throw new AppBadRequestException("Old password is incorrect");
-        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
     }
 
     private User getById(Long id) {

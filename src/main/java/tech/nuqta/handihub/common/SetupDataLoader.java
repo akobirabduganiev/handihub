@@ -42,7 +42,7 @@ public class SetupDataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (roleRepository.findAll().isEmpty()) {
+        if (roleRepository.count() == 0) {
             var user = new Role();
             user.setName(RoleName.USER);
             roleRepository.save(user);
@@ -55,7 +55,7 @@ public class SetupDataLoader implements CommandLineRunner {
             vendor.setName(RoleName.VENDOR);
             roleRepository.save(vendor);
         }
-        if (userRepository.findAll().isEmpty()) {
+        if (userRepository.count() == 0) {
             var userRole = roleRepository.findByName(RoleName.USER)
                     .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
             var adminRole = roleRepository.findByName(RoleName.ADMIN).orElseThrow(

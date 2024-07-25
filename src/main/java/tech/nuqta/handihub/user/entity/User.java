@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails, Principal {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String firstname;
     private String lastname;
     private LocalDate dateOfBirth;
-    @Column(unique = true)
+    @Column
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
