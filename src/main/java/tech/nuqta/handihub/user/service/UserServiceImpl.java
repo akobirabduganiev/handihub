@@ -15,8 +15,9 @@ import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.enums.RoleName;
 import tech.nuqta.handihub.exception.AppBadRequestException;
+import tech.nuqta.handihub.exception.AppConflictException;
+import tech.nuqta.handihub.exception.OperationNotPermittedException;
 import tech.nuqta.handihub.mapper.UserMapper;
-import tech.nuqta.handihub.role.Role;
 import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.user.dto.UserDto;
 import tech.nuqta.handihub.user.dto.request.UserPasswordUpdateRequest;
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
         var userToUpdate = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
         if (!user.getId().equals(userToUpdate.getId()) &&
                 user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
-            throw new AppBadRequestException("You are not authorized to update this user");
+            throw new OperationNotPermittedException("You are not authorized to update this user");
         }
         userToUpdate.setFirstname(request.getFirstname());
         userToUpdate.setLastname(request.getLastname());
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
         var foundUser = getById(id);
         if (!user.getId().equals(foundUser.getId()) &&
                 user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
-            throw new AppBadRequestException("You are not authorized to delete this user");
+            throw new OperationNotPermittedException("You are not authorized to delete this user");
         }
         foundUser.setDeleted(true);
         foundUser.setEnabled(false);
@@ -96,7 +97,7 @@ public class UserServiceImpl implements UserService {
         var retrievedUser = getById(id);
         if (!user.getId().equals(retrievedUser.getId()) &&
                 user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
-            throw new AppBadRequestException("You are not authorized to retrieve this user");
+            throw new OperationNotPermittedException("You are not authorized to retrieve this user");
         }
         return new ResponseMessage(UserMapper.toDto(retrievedUser), "User retrieved successfully");
     }
@@ -136,7 +137,7 @@ public class UserServiceImpl implements UserService {
         var currentUser = getById(id);
         if (!user.getId().equals(currentUser.getId()) &&
                 user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
-            throw new AppBadRequestException("You are not authorized to make this user a vendor");
+            throw new OperationNotPermittedException("You are not authorized to make this user a vendor");
         }
         currentUser.setVendor(true);
 
@@ -150,7 +151,7 @@ public class UserServiceImpl implements UserService {
             return new ResponseMessage("User is now a vendor");
         } else {
             log.info("User with id: {} is already a vendor", id);
-            return new ResponseMessage("User is already a vendor");
+            throw new AppConflictException("User is already a vendor");
         }
 
     }
@@ -167,7 +168,7 @@ public class UserServiceImpl implements UserService {
         var user = ((User) connectedUser.getPrincipal());
         var currentUser = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
         if (!user.getId().equals(currentUser.getId())) {
-            throw new AppBadRequestException("You are not authorized to update this user's password");
+            throw new OperationNotPermittedException("You are not authorized to update this user's password");
         }
 
         authenticateAndUpdateUserPassword(request.getOldPassword(), request.getNewPassword(), currentUser);

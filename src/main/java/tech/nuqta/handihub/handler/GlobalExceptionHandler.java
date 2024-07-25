@@ -1,6 +1,7 @@
 package tech.nuqta.handihub.handler;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,6 +20,34 @@ import static tech.nuqta.handihub.handler.BusinessErrorCodes.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(OperationNotPermittedException.class)
+    public ResponseEntity<ExceptionResponse> handleException(OperationNotPermittedException exp) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body(
+                        ExceptionResponse.builder()
+                                .errorCode(USER_NOT_AUTHORIZED.getCode())
+                                .errorDescription(USER_NOT_AUTHORIZED.getDescription())
+                                .error(exp.getMessage())
+                                .timestamp(System.currentTimeMillis())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(AppConflictException.class)
+    public ResponseEntity<ExceptionResponse> handleException(AppConflictException exp) {
+        return ResponseEntity
+                .status(CONFLICT)
+                .body(
+                        ExceptionResponse.builder()
+                                .errorCode(APP_CONFLICT.getCode())
+                                .errorDescription(APP_CONFLICT.getDescription())
+                                .error(exp.getMessage())
+                                .timestamp(System.currentTimeMillis())
+                                .build()
+                );
+    }
 
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ExceptionResponse> handleException(LockedException exp) {
@@ -91,19 +120,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppBadRequestException.class)
     public ResponseEntity<ExceptionResponse> handleException(AppBadRequestException exp) {
-        return ResponseEntity
-                .status(BAD_REQUEST)
-                .body(
-                        ExceptionResponse.builder()
-                                .error(exp.getMessage())
-                                .errorCode(BAD_REQUEST.value())
-                                .timestamp(System.currentTimeMillis())
-                                .build()
-                );
-    }
-
-    @ExceptionHandler(OperationNotPermittedException.class)
-    public ResponseEntity<ExceptionResponse> handleException(OperationNotPermittedException exp) {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
