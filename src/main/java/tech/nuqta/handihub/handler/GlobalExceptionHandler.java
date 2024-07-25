@@ -18,6 +18,10 @@ import java.util.Set;
 import static org.springframework.http.HttpStatus.*;
 import static tech.nuqta.handihub.handler.BusinessErrorCodes.*;
 
+/**
+ * This class provides global exception handling for the REST API.
+ * It handles various exceptions that can occur during the execution of an operation.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

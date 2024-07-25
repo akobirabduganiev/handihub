@@ -5,6 +5,17 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * The UserPasswordUpdateRequest class represents a request to update a user's password.
+ *
+ * It contains the following fields:
+ * - id: The identifier of the user whose password will be updated.
+ * - oldPassword: The user's current password.
+ * - newPassword: The new password to be set for the user.
+ *
+ * This class is typically used as a parameter in the updatePassword method of the UserService interface.
+ * It is also used in the updatePassword method of the UserController class to handle HTTP requests related to password updates.
+ */
 @Getter
 @Setter
 public class UserPasswordUpdateRequest {

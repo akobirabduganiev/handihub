@@ -8,6 +8,10 @@ import tech.nuqta.handihub.user.entity.User;
 
 import java.util.List;
 
+/**
+ * This class represents a ProductEntity.
+ * It extends the BaseEntity class and stores information about a product in the database.
+ */
 @Getter
 @Setter
 @Entity

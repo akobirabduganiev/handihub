@@ -5,6 +5,11 @@ import org.springframework.http.HttpStatus;
 
 import static org.springframework.http.HttpStatus.*;
 
+/**
+ * Enumeration of business error codes.
+ * Each code consists of a numeric value, an associated HTTP status and a description.
+ * The code represents a specific business error that can occur during the execution of an operation.
+ */
 @Getter
 public enum BusinessErrorCodes {
     NO_CODE(0, NOT_IMPLEMENTED, "No code"),

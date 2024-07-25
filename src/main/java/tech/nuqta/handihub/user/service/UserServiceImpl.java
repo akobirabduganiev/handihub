@@ -41,11 +41,13 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Updates the user information with the provided details.
+     * Updates the user information based on the provided user update request.
      *
-     * @param request The object containing the user update request details.
-     * @return The response message indicating the status of the update operation.
-     * @throws AppBadRequestException If the user specified in the request is not found.
+     * @param request         The user update request containing the new user information.
+     * @param connectedUser   The authenticated user who is performing the update.
+     * @return A response message indicating the success of the update.
+     * @throws AppBadRequestException        If the user to update is not found.
+     * @throws OperationNotPermittedException If the connected user is not authorized to update the user.
      */
     @Override
     public ResponseMessage updateUser(UserUpdateRequest request, Authentication connectedUser) {
@@ -65,10 +67,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Deletes a user by id.
+     * Deletes a user with the given ID.
      *
-     * @param id The id of the user to be deleted.
-     * @return A ResponseMessage indicating the result of the operation.
+     * @param id              the ID of the user to be deleted
+     * @param connectedUser   the authenticated user performing the operation
+     * @return a ResponseMessage indicating the success of the operation
+     * @throws OperationNotPermittedException if the connected user is not authorized to delete the user
      */
     @Override
     public ResponseMessage deleteUser(Long id, Authentication connectedUser) {
@@ -86,10 +90,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Gets a user by ID.
+     * This method retrieves a user by their ID.
      *
-     * @param id The ID of the user to retrieve.
-     * @return A ResponseMessage object containing the retrieved user and a success message.
+     * @param id             The ID of the user to retrieve.
+     * @param connectedUser  The currently authenticated user.
+     * @return A ResponseMessage object containing the retrieved user as a DTO and a success message.
+     * @throws OperationNotPermittedException  If the authenticated user is not authorized to retrieve the user.
      */
     @Override
     public ResponseMessage getUser(Long id, Authentication connectedUser) {
@@ -105,9 +111,9 @@ public class UserServiceImpl implements UserService {
     /**
      * Retrieves a paginated list of users.
      *
-     * @param page The page number to retrieve (starting from 1).
+     * @param page The page number (starting from 1) to retrieve.
      * @param size The number of users to retrieve per page.
-     * @return A {@link PageResponse} containing the list of {@link UserDto} objects, along with pagination information.
+     * @return A PageResponse containing the list of UserDto objects, as well as pagination information.
      */
     @Override
     public PageResponse<UserDto> getUsers(int page, int size) {
@@ -126,10 +132,14 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Makes a user a vendor by updating the user's role to 'VENDOR' and saving the changes.
+     * Makes a user a vendor.
      *
-     * @param id the ID of the user to make a vendor
-     * @return a {@code ResponseMessage} indicating that the user is now a vendor
+     * @param id the ID of the user to be made a vendor
+     * @param connectedUser the currently authenticated user
+     * @return the response message indicating the result of the operation
+     * @throws OperationNotPermittedException if the authenticated user is not authorized to make the specified user a vendor
+     * @throws AppBadRequestException if the vendor role is not found
+     * @throws AppConflictException if the specified user is already a vendor
      */
     @Override
     public ResponseMessage makeVendor(Long id, Authentication connectedUser) {
@@ -159,9 +169,11 @@ public class UserServiceImpl implements UserService {
     /**
      * Updates the password of a user.
      *
-     * @param request the UserPasswordUpdateRequest object containing request details
-     * @return a ResponseMessage object indicating the status of the password update
-     * @throws AppBadRequestException if the user is not found
+     * @param request         the UserPasswordUpdateRequest containing the old and new password
+     * @param connectedUser   the current authenticated user
+     * @return a ResponseMessage indicating whether the password was updated successfully
+     * @throws AppBadRequestException       if the user is not found
+     * @throws OperationNotPermittedException  if the authenticated user is not authorized to update the password
      */
     @Override
     public ResponseMessage updatePassword(UserPasswordUpdateRequest request, Authentication connectedUser) {
@@ -177,11 +189,11 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Authenticates the user using the given old password and updates the user's password to the given new password.
+     * Authenticates the user with the old password and updates the user's password to the new password.
      *
-     * @param oldPassword The old password of the user.
-     * @param newPassword The new password to update for the user.
-     * @param user The user for whom the password needs to be updated.
+     * @param oldPassword the old password of the user
+     * @param newPassword the new password to update
+     * @param user the user whose password needs to be updated
      */
     private void authenticateAndUpdateUserPassword(String oldPassword, String newPassword, User user) {
         authenticationManager.authenticate(
@@ -195,6 +207,13 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    /**
+     * Retrieves a User object by its ID.
+     *
+     * @param id the ID of the User to retrieve
+     * @return the User object identified by the given ID
+     * @throws AppBadRequestException if the User with the given ID does not exist
+     */
     private User getById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new AppBadRequestException("User not found"));
     }

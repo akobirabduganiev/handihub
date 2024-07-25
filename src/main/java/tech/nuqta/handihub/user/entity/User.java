@@ -24,6 +24,21 @@ import java.util.stream.Collectors;
 
 
 
+/**
+ * The User class represents a user in the application.
+ *
+ * It is an entity class mapped to the "users" table in the database.
+ * It implements the UserDetails and Principal interfaces for authentication and authorization purposes.
+ *
+ * It contains fields representing user information such as first name, last name, date of birth, email, password, gender,
+ * whether the user is deleted or active, whether the user is a vendor, and other details.
+ *
+ * It also defines relationships with the Role class to represent the roles associated with the user.
+ * It provides methods to get user authorities, username, account status, and other details required for authentication and authorization.
+ *
+ * It includes annotations such as @Entity, @Table, @Getter, @Setter, @SuperBuilder, @NoArgsConstructor, @AllArgsConstructor, @Override, and others
+ * to define the entity mapping, getters and setters, builder pattern, default constructor, all args constructor, and method overrides.
+ */
 @Getter
 @Setter
 @SuperBuilder

@@ -9,6 +9,17 @@ import tech.nuqta.handihub.enums.Gender;
 
 import java.time.LocalDate;
 
+/**
+ * The UserUpdateRequest class represents a request to update a user's information.
+ * It contains the following fields:
+ * - id: The identifier of the user.
+ * - firstname: The first name of the user.
+ * - lastname: The last name of the user.
+ * - dateOfBirth: The date of birth of the user.
+ * - gender: The gender of the user.
+ * This class is typically used as a parameter in the updateUser method of the UserService interface.
+ * It is also used in the updateUser method of the UserController class to handle HTTP requests related to user updates.
+ */
 @Getter
 @Setter
 public class UserUpdateRequest {

@@ -7,6 +7,10 @@ import tech.nuqta.handihub.user.entity.User;
 
 import java.util.Optional;
 
+/**
+ * The UserRepository interface extends the JpaRepository interface for managing User entities in the database.
+ * It provides methods for performing CRUD operations on User entities.
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.isDeleted = false")
     Optional<User> findByEmail(@Param("email") String email);

@@ -6,6 +6,11 @@ import lombok.*;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Represents the response structure for handling exceptions.
+ * This class provides getters and setters for its properties.
+ * It also uses lombok annotations to generate the boilerplate code.
+ */
 @Getter
 @Setter
 @Builder

@@ -13,6 +13,12 @@ import tech.nuqta.handihub.user.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The Role class represents a role in the application.
+ *
+ * It is an entity class mapped to the "role" table in the database.
+ * It also defines a relationship with the User class to represent the users associated with the role.
+ */
 @Getter
 @Setter
 @Builder
