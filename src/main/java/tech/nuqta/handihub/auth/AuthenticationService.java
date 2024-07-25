@@ -5,7 +5,10 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,12 +85,19 @@ public class AuthenticationService {
      * @return An {@link AuthenticationResponse} object containing the user details and access tokens.
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        var auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        Authentication auth = null;
+        try {
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (InternalAuthenticationServiceException e) {
+            throw new ItemNotFoundException("User not found");
+        } catch (AuthenticationException e) {
+            throw new AppBadRequestException("Invalid credentials");
+        }
         var user = (User) auth.getPrincipal();
         var claims = new HashMap<String, Object>();
         claims.put("fullName", user.getFullName());
