@@ -11,8 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 public class PageResponse<T> {
     private List<T> content;
-    private int number;
-    private int size;
+    private int pageNumber;
+    private int pageSize;
     private long totalElements;
     private int totalPages;
     private boolean first;

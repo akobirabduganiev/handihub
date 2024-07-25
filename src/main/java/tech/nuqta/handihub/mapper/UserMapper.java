@@ -13,7 +13,7 @@ public class UserMapper {
     public static UserDto toDto(User user) {
         return new UserDto(user.getId(), user.getFirstname(), user.getLastname(), user.getDateOfBirth(),
                 user.getEmail(),user.getGender(), user.isVendor(), user.isAccountLocked(), user.isEnabled(),
-                Arrays.asList(user.getAuthorities().toArray()), user.getCreatedDate(), user.getLastModifiedDate());
+                Arrays.asList(user.getAuthorities().toArray()), user.getCreatedAt(), user.getUpdatedAt(), user.getModifiedBy());
     }
 
     public static List<UserDto> toDtoList(List<User> users) {

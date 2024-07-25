@@ -12,5 +12,5 @@ import java.util.List;
  */
 public record UserDto(Long id, String firstname, String lastname, LocalDate dateOfBirth, String email,
                       Gender gender, boolean isVendor, boolean accountLocked, boolean enabled, List<Object> authorities,
-                      LocalDateTime createdDate, LocalDateTime lastModifiedDate) implements Serializable {
+                      LocalDateTime createdAt, LocalDateTime updatedAt, Long modifiedBy) implements Serializable {
 }
