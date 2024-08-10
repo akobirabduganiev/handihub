@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Table(name = "otp")
 public class OTP {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
     private String OTP;
