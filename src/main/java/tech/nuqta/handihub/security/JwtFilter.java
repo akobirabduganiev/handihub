@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             final String jwt = resolveToken(request);
             if (jwt == null) {
-                writeJsonResponse(response, "No OTP provided");
+                writeJsonResponse(response, "No Token provided");
                 return;
             }
 
@@ -57,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             writeJsonResponse(response, "Token expired");
         } catch (Exception e) {
-            writeJsonResponse(response, "Invalid OTP: " + e.getMessage());
+            writeJsonResponse(response, "Invalid Token: " + e.getMessage());
         }
     }
 
@@ -76,11 +76,11 @@ public class JwtFilter extends OncePerRequestFilter {
     private void processUserAuthentication(HttpServletRequest request, HttpServletResponse response, String jwt, String userEmail) throws IOException {
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
         if (!jwtService.isTokenValid(jwt, userDetails)) {
-            writeJsonResponse(response, "Invalid OTP");
+            writeJsonResponse(response, "Invalid Token");
             return;
         }
         if (jwtService.isRefreshToken(jwt)) {
-            writeJsonResponse(response, "Refresh OTP not allowed!");
+            writeJsonResponse(response, "Refresh Token not allowed!");
             return;
         }
         setUsernamePasswordAuthenticationToken(request, userDetails);
