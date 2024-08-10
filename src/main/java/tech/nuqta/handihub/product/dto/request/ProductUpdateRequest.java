@@ -23,10 +23,12 @@ public record ProductUpdateRequest(
         @NotNull(message = "Product dimensions is required")
         @Size(min = 3, max = 255, message = "Product dimensions must be between 3 and 255 characters")
         String dimensions,
-        boolean isFeatured,
-        boolean isHandmade,
-        boolean madeToOrder,
-        boolean isEnabled,
+        @NotNull(message = "Product featured status is required")
+        Boolean isFeatured,
+        @NotNull(message = "Product handmade status is required")
+        Boolean isHandmade,
+        @NotNull(message = "Product made to order status is required")
+        Boolean madeToOrder,
         @NotNull(message = "Product price is required")
         @Positive(message = "Product price must be greater than 0")
         Double price,

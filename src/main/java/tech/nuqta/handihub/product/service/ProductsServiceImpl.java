@@ -17,6 +17,8 @@ import tech.nuqta.handihub.product.repository.ProductsRepository;
 import tech.nuqta.handihub.user.entity.User;
 import tech.nuqta.handihub.user.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,9 +30,9 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser) {
         var connectedUserPrincipal = (User) connectedUser.getPrincipal();
-        var category = categoryRepository.findById(request.getCategoryId())
+        var category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ItemNotFoundException("Category not found"));
-        var user = userRepository.findById(request.getUserId())
+        var user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ItemNotFoundException("User not found"));
         if (!user.getId().equals(connectedUserPrincipal.getId())) {
             return new ResponseMessage("You are not authorized to add product for this user");
@@ -42,7 +44,18 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public ResponseMessage updateProduct(ProductUpdateRequest request, Authentication connectedUser) {
-        return null;
+        var connectedUserPrincipal = (User) connectedUser.getPrincipal();
+        var product = productsRepository.findById(request.id())
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+        if (!product.getUser().getId().equals(connectedUserPrincipal.getId())) {
+            return new ResponseMessage("You are not authorized to update this product");
+        }
+        var category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ItemNotFoundException("Category not found"));
+        updateProductFields(request, product, category);
+        productsRepository.save(product);
+
+        return new ResponseMessage("Product updated successfully");
     }
 
     @Override
@@ -62,20 +75,35 @@ public class ProductsServiceImpl implements ProductsService {
 
     private static ProductEntity createProductEntity(ProductCreateRequest request, User user, CategoryEntity category) {
         var product = new ProductEntity();
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setSku(request.getSku());
-        product.setBrand(request.getBrand());
-        product.setWeight(request.getWeight());
-        product.setDimensions(request.getDimensions());
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setSku(request.sku());
+        product.setBrand(request.brand());
+        product.setWeight(request.weight());
+        product.setDimensions(request.dimensions());
         product.setEnabled(request.isEnabled());
         product.setFeatured(request.isFeatured());
         product.setHandmade(request.isHandmade());
-        product.setMadeToOrder(request.isMadeToOrder());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
+        product.setMadeToOrder(request.madeToOrder());
+        product.setPrice(request.price());
+        product.setQuantity(request.quantity());
         product.setUser(user);
         product.setCategory(category);
         return product;
+    }
+
+    private void updateProductFields(ProductUpdateRequest request, ProductEntity product, CategoryEntity category) {
+        Optional.ofNullable(request.name()).ifPresent(product::setName);
+        Optional.ofNullable(request.description()).ifPresent(product::setDescription);
+        Optional.ofNullable(request.sku()).ifPresent(product::setSku);
+        Optional.ofNullable(request.brand()).ifPresent(product::setBrand);
+        Optional.ofNullable(request.weight()).ifPresent(product::setWeight);
+        Optional.ofNullable(request.dimensions()).ifPresent(product::setDimensions);
+        Optional.ofNullable(request.isFeatured()).ifPresent(product::setFeatured);
+        Optional.ofNullable(request.isHandmade()).ifPresent(product::setHandmade);
+        Optional.ofNullable(request.madeToOrder()).ifPresent(product::setMadeToOrder);
+        Optional.ofNullable(request.price()).ifPresent(product::setPrice);
+        Optional.ofNullable(request.quantity()).ifPresent(product::setQuantity);
+        product.setCategory(category);
     }
 }
