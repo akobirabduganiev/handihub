@@ -23,20 +23,21 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ProductsServiceImpl implements ProductsService {
+
     private final ProductsRepository productsRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
     @Override
     public ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser) {
-        var connectedUserPrincipal = (User) connectedUser.getPrincipal();
-        var category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ItemNotFoundException("Category not found"));
-        var user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ItemNotFoundException("User not found"));
-        if (!user.getId().equals(connectedUserPrincipal.getId())) {
+        var currentUser = (User) connectedUser.getPrincipal();
+        var category = fetchCategoryById(request.categoryId());
+        var user = fetchUserById(request.userId());
+
+        if (!user.getId().equals(currentUser.getId())) {
             return new ResponseMessage("You are not authorized to add product for this user");
         }
+
         var product = createProductEntity(request, user, category);
         productsRepository.save(product);
         return new ResponseMessage("Product added successfully");
@@ -44,17 +45,17 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public ResponseMessage updateProduct(ProductUpdateRequest request, Authentication connectedUser) {
-        var connectedUserPrincipal = (User) connectedUser.getPrincipal();
+        var currentUser = (User) connectedUser.getPrincipal();
         var product = productsRepository.findById(request.id())
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-        if (!product.getUser().getId().equals(connectedUserPrincipal.getId())) {
+
+        if (!product.getUser().getId().equals(currentUser.getId())) {
             return new ResponseMessage("You are not authorized to update this product");
         }
-        var category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ItemNotFoundException("Category not found"));
+
+        var category = fetchCategoryById(request.categoryId());
         updateProductFields(request, product, category);
         productsRepository.save(product);
-
         return new ResponseMessage("Product updated successfully");
     }
 
@@ -105,5 +106,15 @@ public class ProductsServiceImpl implements ProductsService {
         Optional.ofNullable(request.price()).ifPresent(product::setPrice);
         Optional.ofNullable(request.quantity()).ifPresent(product::setQuantity);
         product.setCategory(category);
+    }
+
+    private CategoryEntity fetchCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ItemNotFoundException("Category not found"));
+    }
+
+    private User fetchUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ItemNotFoundException("User not found"));
     }
 }

@@ -1,5 +1,6 @@
 package tech.nuqta.handihub.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import java.util.Optional;
  * It implements the AuditorAware interface and specifies the type Long as the auditor type.
  */
 public class ApplicationAuditAware implements AuditorAware<Long> {
+    @NotNull
     @Override
     public Optional<Long> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

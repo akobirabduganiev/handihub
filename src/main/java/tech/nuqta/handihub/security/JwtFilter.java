@@ -2,10 +2,10 @@ package tech.nuqta.handihub.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,76 +26,74 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String AUTH_API_PATH = "/api/v1/auth";
+
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    /**
-     * Performs the filter logic for authentication and authorization.
-     *
-     * @param request      the HTTP servlet request
-     * @param response     the HTTP servlet response
-     * @param filterChain the filter chain for executing subsequent filters
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws IOException {
         try {
-            if (request.getServletPath().contains("/api/v1/auth")) {
+            if (isAuthRequest(request)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            final String authHeader = request.getHeader("Authorization");
-            final String jwt;
-            final String userEmail;
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "No OTP provided");
+
+            final String jwt = resolveToken(request);
+            if (jwt == null) {
+                writeJsonResponse(response, "No OTP provided");
                 return;
             }
-            jwt = authHeader.substring(7);
-            userEmail = jwtService.extractUsername(jwt);
+
+            final String userEmail = jwtService.extractUsername(jwt);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if (!jwtService.isTokenValid(jwt, userDetails)) {
-                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid OTP");
-                    return;
-                }
-                if (jwtService.isRefreshToken(jwt)) {
-                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh OTP not allowed!");
-                    return;
-                }
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                processUserAuthentication(request, response, jwt, userEmail);
             }
+
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+            writeJsonResponse(response, "Token expired");
         } catch (Exception e) {
-            writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid OTP: " + e.getMessage());
+            writeJsonResponse(response, "Invalid OTP: " + e.getMessage());
         }
     }
 
-    /**
-     * Checks if the given request should not be filtered.
-     *
-     * @param request The HttpServletRequest object representing the current request.
-     * @return true if the request should not be filtered, false otherwise.
-     * @throws ServletException if an error occurs while filtering the request.
-     */
+    private boolean isAuthRequest(HttpServletRequest request) {
+        return request.getServletPath().contains(AUTH_API_PATH);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            return null;
+        }
+        return authHeader.substring(BEARER_PREFIX.length());
+    }
+
+    private void processUserAuthentication(HttpServletRequest request, HttpServletResponse response, String jwt, String userEmail) throws IOException {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+        if (!jwtService.isTokenValid(jwt, userDetails)) {
+            writeJsonResponse(response, "Invalid OTP");
+            return;
+        }
+        if (jwtService.isRefreshToken(jwt)) {
+            writeJsonResponse(response, "Refresh OTP not allowed!");
+            return;
+        }
+        setUsernamePasswordAuthenticationToken(request, userDetails);
+    }
+
+    private void setUsernamePasswordAuthenticationToken(HttpServletRequest request, UserDetails userDetails) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
+
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         List<String> pathsToSkip = Arrays.asList(
                 "/api/v1/auth/**",
                 "/v2/api-docs",
@@ -110,20 +108,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 "/swagger-ui.html"
         );
         AntPathMatcher pathMatcher = new AntPathMatcher();
-
         return pathsToSkip.stream().anyMatch(path -> pathMatcher.match(path, request.getServletPath()));
     }
-    /**
-     * Writes JSON response with the given status and error message to the HttpServletResponse object.
-     *
-     * @param response     the HttpServletResponse object to write the response to
-     * @param status       the HTTP status code for the response
-     * @param errorMessage the error message to include in the response
-     * @throws IOException if an I/O error occurs while writing the response
-     */
-    private void writeJsonResponse(HttpServletResponse response, int status, String errorMessage) throws IOException{
-        response.setStatus(status);
+
+    private void writeJsonResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \""+ errorMessage + "\"}");
+        response.getWriter().write("{\"error\": \"" + errorMessage + "\"}");
     }
 }
