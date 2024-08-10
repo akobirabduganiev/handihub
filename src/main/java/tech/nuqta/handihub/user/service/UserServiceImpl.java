@@ -43,10 +43,10 @@ public class UserServiceImpl implements UserService {
     /**
      * Updates the user information based on the provided user update request.
      *
-     * @param request         The user update request containing the new user information.
-     * @param connectedUser   The authenticated user who is performing the update.
+     * @param request       The user update request containing the new user information.
+     * @param connectedUser The authenticated user who is performing the update.
      * @return A response message indicating the success of the update.
-     * @throws AppBadRequestException        If the user to update is not found.
+     * @throws AppBadRequestException         If the user to update is not found.
      * @throws OperationNotPermittedException If the connected user is not authorized to update the user.
      */
     @Override
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         var user = ((User) connectedUser.getPrincipal());
         var userToUpdate = userRepository.findById(request.getId()).orElseThrow(() -> new AppBadRequestException("User not found"));
         if (!user.getId().equals(userToUpdate.getId()) &&
-                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+                !user.isAdmin()) {
             throw new OperationNotPermittedException("You are not authorized to update this user");
         }
         userToUpdate.setFirstname(request.getFirstname());
@@ -69,8 +69,8 @@ public class UserServiceImpl implements UserService {
     /**
      * Deletes a user with the given ID.
      *
-     * @param id              the ID of the user to be deleted
-     * @param connectedUser   the authenticated user performing the operation
+     * @param id            the ID of the user to be deleted
+     * @param connectedUser the authenticated user performing the operation
      * @return a ResponseMessage indicating the success of the operation
      * @throws OperationNotPermittedException if the connected user is not authorized to delete the user
      */
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         var user = ((User) connectedUser.getPrincipal());
         var foundUser = getById(id);
         if (!user.getId().equals(foundUser.getId()) &&
-                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+                !user.isAdmin()) {
             throw new OperationNotPermittedException("You are not authorized to delete this user");
         }
         foundUser.setDeleted(true);
@@ -92,17 +92,17 @@ public class UserServiceImpl implements UserService {
     /**
      * This method retrieves a user by their ID.
      *
-     * @param id             The ID of the user to retrieve.
-     * @param connectedUser  The currently authenticated user.
+     * @param id            The ID of the user to retrieve.
+     * @param connectedUser The currently authenticated user.
      * @return A ResponseMessage object containing the retrieved user as a DTO and a success message.
-     * @throws OperationNotPermittedException  If the authenticated user is not authorized to retrieve the user.
+     * @throws OperationNotPermittedException If the authenticated user is not authorized to retrieve the user.
      */
     @Override
     public ResponseMessage getUser(Long id, Authentication connectedUser) {
         var user = ((User) connectedUser.getPrincipal());
         var retrievedUser = getById(id);
         if (!user.getId().equals(retrievedUser.getId()) &&
-                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+                !user.isAdmin()) {
             throw new OperationNotPermittedException("You are not authorized to retrieve this user");
         }
         return new ResponseMessage(UserMapper.toDto(retrievedUser), "User retrieved successfully");
@@ -134,19 +134,19 @@ public class UserServiceImpl implements UserService {
     /**
      * Makes a user a vendor.
      *
-     * @param id the ID of the user to be made a vendor
+     * @param id            the ID of the user to be made a vendor
      * @param connectedUser the currently authenticated user
      * @return the response message indicating the result of the operation
      * @throws OperationNotPermittedException if the authenticated user is not authorized to make the specified user a vendor
-     * @throws AppBadRequestException if the vendor role is not found
-     * @throws AppConflictException if the specified user is already a vendor
+     * @throws AppBadRequestException         if the vendor role is not found
+     * @throws AppConflictException           if the specified user is already a vendor
      */
     @Override
     public ResponseMessage makeVendor(Long id, Authentication connectedUser) {
         var user = ((User) connectedUser.getPrincipal());
         var currentUser = getById(id);
         if (!user.getId().equals(currentUser.getId()) &&
-                user.getRoles().stream().noneMatch(role -> role.getName().equals(RoleName.ADMIN))) {
+                !user.isAdmin()) {
             throw new OperationNotPermittedException("You are not authorized to make this user a vendor");
         }
         currentUser.setVendor(true);
@@ -169,11 +169,11 @@ public class UserServiceImpl implements UserService {
     /**
      * Updates the password of a user.
      *
-     * @param request         the UserPasswordUpdateRequest containing the old and new password
-     * @param connectedUser   the current authenticated user
+     * @param request       the UserPasswordUpdateRequest containing the old and new password
+     * @param connectedUser the current authenticated user
      * @return a ResponseMessage indicating whether the password was updated successfully
-     * @throws AppBadRequestException       if the user is not found
-     * @throws OperationNotPermittedException  if the authenticated user is not authorized to update the password
+     * @throws AppBadRequestException         if the user is not found
+     * @throws OperationNotPermittedException if the authenticated user is not authorized to update the password
      */
     @Override
     public ResponseMessage updatePassword(UserPasswordUpdateRequest request, Authentication connectedUser) {
@@ -193,7 +193,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param oldPassword the old password of the user
      * @param newPassword the new password to update
-     * @param user the user whose password needs to be updated
+     * @param user        the user whose password needs to be updated
      */
     private void authenticateAndUpdateUserPassword(String oldPassword, String newPassword, User user) {
         authenticationManager.authenticate(

@@ -11,6 +11,6 @@ public interface ProductsService {
     ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser);
     ResponseMessage updateProduct(ProductUpdateRequest request, Authentication connectedUser);
     ResponseMessage deleteProduct(Long id, Authentication connectedUser);
-    ResponseMessage getProduct(Long id, Authentication connectedUser);
+    ResponseMessage getProduct(Long id);
     PageResponse<ProductDTO> getProducts(int page, int size);
 }

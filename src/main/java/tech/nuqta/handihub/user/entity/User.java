@@ -61,6 +61,7 @@ public class User implements UserDetails, Principal {
     private Gender gender;
     private boolean isDeleted = false;
     private boolean isVendor = false;
+    private boolean isAdmin = false;
     private boolean accountLocked;
     private boolean enabled;
     @ManyToMany(fetch = FetchType.EAGER)
@@ -94,18 +95,8 @@ public class User implements UserDetails, Principal {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
     public boolean isAccountNonLocked() {
         return !accountLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
     }
 
     @Override

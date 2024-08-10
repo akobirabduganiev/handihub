@@ -2,13 +2,18 @@ package tech.nuqta.handihub.product.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.nuqta.handihub.category.entity.CategoryEntity;
 import tech.nuqta.handihub.category.repository.CategoryRepository;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
+import tech.nuqta.handihub.mapper.ProductMapper;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
@@ -44,6 +49,7 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage updateProduct(ProductUpdateRequest request, Authentication connectedUser) {
         var currentUser = (User) connectedUser.getPrincipal();
         var product = productsRepository.findById(request.id())
@@ -61,17 +67,39 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public ResponseMessage deleteProduct(Long id, Authentication connectedUser) {
-        return null;
+        var product = productsRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        var currentUser = (User) connectedUser.getPrincipal();
+        if (!product.getUser().getId().equals(currentUser.getId()) && !currentUser.isAdmin()) {
+            return new ResponseMessage("You are not authorized to delete this product");
+        }
+        product.setIsDeleted(true);
+        productsRepository.save(product);
+        return new ResponseMessage("Product deleted successfully");
+
     }
 
     @Override
-    public ResponseMessage getProduct(Long id, Authentication connectedUser) {
-        return null;
+    public ResponseMessage getProduct(Long id) {
+        var product = productsRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+        return new ResponseMessage(ProductMapper.toDto(product), "Product retrieved successfully");
     }
 
     @Override
     public PageResponse<ProductDTO> getProducts(int page, int size) {
-        return null;
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        var products = productsRepository.findAll(pageable);
+        return new PageResponse<>(
+                ProductMapper.toDtoList(products.getContent()),
+                products.getNumber() + 1,
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );
     }
 
     private static ProductEntity createProductEntity(ProductCreateRequest request, User user, CategoryEntity category) {

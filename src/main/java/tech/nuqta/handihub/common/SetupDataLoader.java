@@ -21,9 +21,9 @@ public class SetupDataLoader implements CommandLineRunner {
     /**
      * Sets up initial data in the application by creating default roles and users if they don't already exist.
      *
-     * @param userRepository   the user repository
-     * @param roleRepository   the role repository
-     * @param passwordEncoder  the password encoder
+     * @param userRepository  the user repository
+     * @param roleRepository  the role repository
+     * @param passwordEncoder the password encoder
      */
     public SetupDataLoader(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -60,8 +60,6 @@ public class SetupDataLoader implements CommandLineRunner {
                     .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
             var adminRole = roleRepository.findByName(RoleName.ADMIN).orElseThrow(
                     () -> new IllegalStateException("ROLE ADMIN was not initiated"));
-            var vendorRole = roleRepository.findByName(RoleName.VENDOR).orElseThrow(
-                    () -> new IllegalStateException("ROLE VENDOR was not initiated"));
 
             var admin = new User();
             admin.setFirstname("Adminjon");
@@ -71,13 +69,13 @@ public class SetupDataLoader implements CommandLineRunner {
             admin.setRoles(List.of(adminRole));
             admin.setEnabled(true);
             admin.setAccountLocked(false);
+            admin.setAdmin(true);
             userRepository.save(admin);
 
             var user = new User();
             user.setFirstname("Userbek");
             user.setLastname("Userjonov");
             user.setEmail("user@handihub.uz");
-            user.setRoles(List.of(userRole, vendorRole));
             user.setEnabled(true);
             user.setAccountLocked(false);
             user.setPassword(passwordEncoder.encode("user"));

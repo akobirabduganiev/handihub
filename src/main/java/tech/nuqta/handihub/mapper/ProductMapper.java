@@ -3,6 +3,8 @@ package tech.nuqta.handihub.mapper;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.entity.ProductEntity;
 
+import java.util.List;
+
 public class ProductMapper {
     public static ProductDTO toDto(ProductEntity entity) {
         return new ProductDTO(
@@ -27,5 +29,11 @@ public class ProductMapper {
                 entity.getUser().getId(),
                 entity.getCategory().getId()
         );
+    }
+
+    public static List<ProductDTO> toDtoList(List<ProductEntity> content) {
+        return content.stream()
+                .map(ProductMapper::toDto)
+                .toList();
     }
 }
