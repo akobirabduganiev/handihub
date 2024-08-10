@@ -5,10 +5,8 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +18,8 @@ import tech.nuqta.handihub.exception.AppBadRequestException;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.role.RoleRepository;
 import tech.nuqta.handihub.security.JwtService;
-import tech.nuqta.handihub.token.Token;
-import tech.nuqta.handihub.token.TokenRepository;
+import tech.nuqta.handihub.otp.OTP;
+import tech.nuqta.handihub.otp.OTPRepository;
 import tech.nuqta.handihub.user.entity.User;
 import tech.nuqta.handihub.user.repository.UserRepository;
 
@@ -42,7 +40,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final TokenRepository tokenRepository;
+    private final OTPRepository OTPRepository;
     private final RoleRepository roleRepository;
     private final EmailService emailService;
 
@@ -112,18 +110,18 @@ public class AuthenticationService {
     }
 
     /**
-     * Refreshes the access token using the provided refresh token.
+     * Refreshes the access OTP using the provided refresh OTP.
      *
-     * @param refreshToken The refresh token to refresh the access token.
-     * @return The authentication response with the refreshed access token.
-     * @throws AppBadRequestException If the refresh token is invalid.
-     * @throws ItemNotFoundException  If the user corresponding to the username extracted from the refresh token is not found.
-     * @throws AppBadRequestException If the refresh token has expired.
+     * @param refreshToken The refresh OTP to refresh the access OTP.
+     * @return The authentication response with the refreshed access OTP.
+     * @throws AppBadRequestException If the refresh OTP is invalid.
+     * @throws ItemNotFoundException  If the user corresponding to the username extracted from the refresh OTP is not found.
+     * @throws AppBadRequestException If the refresh OTP has expired.
      */
     public AuthenticationResponse refreshToken(String refreshToken) {
         try {
             if (!jwtService.isRefreshToken(refreshToken)) {
-                throw new AppBadRequestException("Invalid refresh token");
+                throw new AppBadRequestException("Invalid refresh OTP");
             }
             var username = jwtService.extractUsername(refreshToken);
             var user = userRepository.findByEmail(username)
@@ -143,27 +141,27 @@ public class AuthenticationService {
                     .accessToken(newAccessToken)
                     .build();
         } catch (ExpiredJwtException e) {
-            throw new AppBadRequestException("Refresh token has expired");
+            throw new AppBadRequestException("Refresh OTP has expired");
         }
     }
 
 
     /**
-     * Activates the account using the provided token.
+     * Activates the account using the provided OTP.
      *
-     * @param token the activation token
+     * @param token the activation OTP
      * @return the response message indicating the result of the activation process
      * @throws MessagingException     if an error occurs while sending the validation email
-     * @throws AppBadRequestException if the token is invalid or has expired
-     * @throws ItemNotFoundException  if the user associated with the token is not found
+     * @throws AppBadRequestException if the OTP is invalid or has expired
+     * @throws ItemNotFoundException  if the user associated with the OTP is not found
      */
     @Transactional
     public ResponseMessage activateAccount(String token) throws MessagingException {
-        var savedToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppBadRequestException("Invalid token"));
+        var savedToken = OTPRepository.findByOTP(token)
+                .orElseThrow(() -> new AppBadRequestException("Invalid OTP"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
             sendValidationEmail(savedToken.getUser());
-            throw new AppBadRequestException("Activation token has expired. A new token has been sent to the same email address");
+            throw new AppBadRequestException("Activation OTP has expired. A new OTP has been sent to the same email address");
         }
 
         var user = userRepository.findById(savedToken.getUser().getId())
@@ -172,25 +170,25 @@ public class AuthenticationService {
         userRepository.save(user);
 
         savedToken.setValidatedAt(LocalDateTime.now());
-        tokenRepository.save(savedToken);
+        OTPRepository.save(savedToken);
         return new ResponseMessage("Account activated successfully");
     }
 
     /**
-     * Generates an activation token for the given user and saves it in the token repository.
+     * Generates an activation OTP for the given user and saves it in the OTP repository.
      *
-     * @param user The user for whom the activation token is being generated and saved.
-     * @return The generated activation token.
+     * @param user The user for whom the activation OTP is being generated and saved.
+     * @return The generated activation OTP.
      */
     private String generateAndSaveActivationToken(User user) {
         String generatedToken = generateActivationCode(6);
-        var token = Token.builder()
-                .token(generatedToken)
+        var token = OTP.builder()
+                .OTP(generatedToken)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(5))
                 .user(user)
                 .build();
-        tokenRepository.save(token);
+        OTPRepository.save(token);
 
         return generatedToken;
     }

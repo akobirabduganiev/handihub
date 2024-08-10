@@ -1,11 +1,6 @@
-package tech.nuqta.handihub.token;
+package tech.nuqta.handihub.otp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,16 +16,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Token {
+@Table(name = "otp")
+public class OTP {
     @Id
     @GeneratedValue
     private Long id;
     @Column(unique = true)
-    private String token;
+    private String OTP;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private LocalDateTime validatedAt;
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

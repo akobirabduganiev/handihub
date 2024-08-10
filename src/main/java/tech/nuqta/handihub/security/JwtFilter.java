@@ -52,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
             final String jwt;
             final String userEmail;
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "No token provided");
+                writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "No OTP provided");
                 return;
             }
             jwt = authHeader.substring(7);
@@ -60,11 +60,11 @@ public class JwtFilter extends OncePerRequestFilter {
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 if (!jwtService.isTokenValid(jwt, userDetails)) {
-                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid OTP");
                     return;
                 }
                 if (jwtService.isRefreshToken(jwt)) {
-                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token not allowed!");
+                    writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh OTP not allowed!");
                     return;
                 }
                 if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -83,7 +83,7 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
         } catch (Exception e) {
-            writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: " + e.getMessage());
+            writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid OTP: " + e.getMessage());
         }
     }
 

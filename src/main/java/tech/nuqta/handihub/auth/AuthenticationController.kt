@@ -16,7 +16,7 @@ import tech.nuqta.handihub.common.ResponseMessage
 
 /**
  * The AuthenticationController class handles the authentication-related APIs.
- * It provides methods for user registration, user authentication, account activation, and token refreshing.
+ * It provides methods for user registration, user authentication, account activation, and OTP refreshing.
  */
 @RestController
 @RequestMapping("/api/v1/auth")
