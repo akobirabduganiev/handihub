@@ -92,7 +92,7 @@ public class ProductsServiceImpl implements ProductsService {
         return product;
     }
 
-    private void updateProductFields(ProductUpdateRequest request, ProductEntity product, CategoryEntity category) {
+    private static void updateProductFields(ProductUpdateRequest request, ProductEntity product, CategoryEntity category) {
         Optional.ofNullable(request.name()).ifPresent(product::setName);
         Optional.ofNullable(request.description()).ifPresent(product::setDescription);
         Optional.ofNullable(request.sku()).ifPresent(product::setSku);
