@@ -27,9 +27,11 @@ public class RatingController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<PageResponse<RatingDto>> getRatings(@RequestParam(defaultValue = "1") int page,
-                                                              @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(ratingService.getRatings(page, size));
+    public ResponseEntity<PageResponse<RatingDto>> getRatings(
+            @RequestParam Long productId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ratingService.getAllProductRatings(productId, page, size));
     }
 
 }

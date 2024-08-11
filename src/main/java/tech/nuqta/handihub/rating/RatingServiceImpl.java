@@ -43,9 +43,9 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public PageResponse<RatingDto> getRatings(int page, int size) {
+    public PageResponse<RatingDto> getAllProductRatings(Long productId, int page, int size) {
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
-        var ratings = ratingRepository.findAll(pageable);
+        var ratings = ratingRepository.findAllByProductId(pageable, productId);
         return new PageResponse<>(
                 RatingMapper.toDtoList(ratings.getContent()),
                 ratings.getNumber() + 1,

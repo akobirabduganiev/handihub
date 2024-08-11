@@ -10,5 +10,5 @@ public interface RatingService {
 
     Double getAverageRating(Long productId);
 
-    PageResponse<RatingDto> getRatings(int page, int size);
+    PageResponse<RatingDto> getAllProductRatings(Long productId, int page, int size);
 }
