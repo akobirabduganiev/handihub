@@ -6,7 +6,7 @@ import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
-import tech.nuqta.handihub.product.dto.request.RateRequest;
+import tech.nuqta.handihub.rating.RateRequest;
 
 public interface ProductsService {
     ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser);
@@ -15,7 +15,5 @@ public interface ProductsService {
     ResponseMessage getProduct(Long id);
     PageResponse<ProductDTO> getProducts(int page, int size);
 
-    ResponseMessage rateProduct(RateRequest request, Authentication connectedUser);
 
-    Double getProductRating(Long id);
 }

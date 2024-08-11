@@ -1,9 +1,10 @@
-package tech.nuqta.handihub.product.entity;
+package tech.nuqta.handihub.rating;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import tech.nuqta.handihub.common.BaseEntity;
+import tech.nuqta.handihub.product.entity.ProductEntity;
 import tech.nuqta.handihub.user.entity.User;
 
 @Getter

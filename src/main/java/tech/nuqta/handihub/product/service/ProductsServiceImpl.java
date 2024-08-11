@@ -17,11 +17,8 @@ import tech.nuqta.handihub.mapper.ProductMapper;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
-import tech.nuqta.handihub.product.dto.request.RateRequest;
 import tech.nuqta.handihub.product.entity.ProductEntity;
-import tech.nuqta.handihub.product.entity.Rating;
 import tech.nuqta.handihub.product.repository.ProductsRepository;
-import tech.nuqta.handihub.product.repository.RatingRepository;
 import tech.nuqta.handihub.user.entity.User;
 import tech.nuqta.handihub.user.repository.UserRepository;
 
@@ -35,7 +32,6 @@ public class ProductsServiceImpl implements ProductsService {
     private final ProductsRepository productsRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final RatingRepository ratingRepository;
 
     @Override
     public ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser) {
@@ -109,26 +105,6 @@ public class ProductsServiceImpl implements ProductsService {
         );
     }
 
-    @Override
-    public ResponseMessage rateProduct(RateRequest request, Authentication connectedUser) {
-        var product = productsRepository.findById(request.productId())
-                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-        var currentUser = (User) connectedUser.getPrincipal();
-        Rating rating = new Rating();
-        rating.setRating(request.rating());
-        rating.setProduct(product);
-        rating.setUser(currentUser);
-        ratingRepository.save(rating);
-        log.info("Product with id {} rated by user with id {}", request.productId(), currentUser.getId());
-        return new ResponseMessage("Product rated successfully");
-    }
-
-    @Override
-    public Double getProductRating(Long id) {
-        var product = productsRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-        return product.getAverageRating();
-    }
 
     private static ProductEntity createProductEntity(ProductCreateRequest request, User user, CategoryEntity category) {
         var product = new ProductEntity();

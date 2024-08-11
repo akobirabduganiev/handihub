@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import tech.nuqta.handihub.category.entity.CategoryEntity;
 import tech.nuqta.handihub.common.BaseEntity;
+import tech.nuqta.handihub.rating.Rating;
 import tech.nuqta.handihub.user.entity.User;
 
 import java.util.List;

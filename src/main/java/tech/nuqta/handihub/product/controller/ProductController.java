@@ -11,7 +11,7 @@ import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
-import tech.nuqta.handihub.product.dto.request.RateRequest;
+import tech.nuqta.handihub.rating.RateRequest;
 import tech.nuqta.handihub.product.service.ProductsService;
 
 @RestController
@@ -48,20 +48,4 @@ public class ProductController {
                                                                 @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(productsService.getProducts(page, size));
     }
-
-    /**
-     RATE PRODUCT
-    **/
-
-    @PostMapping("/rate")
-    @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<ResponseMessage> rateProduct(@RequestBody @Valid RateRequest request, Authentication connectedUser) {
-        return ResponseEntity.ok(productsService.rateProduct(request, connectedUser));
-    }
-
-    @GetMapping("/{id}/rating")
-    public ResponseEntity<Double> getProductRating(@PathVariable Long id) {
-        return ResponseEntity.ok(productsService.getProductRating(id));
-    }
-
 }

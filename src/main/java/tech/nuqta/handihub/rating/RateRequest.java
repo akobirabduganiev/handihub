@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.product.dto.request;
+package tech.nuqta.handihub.rating;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

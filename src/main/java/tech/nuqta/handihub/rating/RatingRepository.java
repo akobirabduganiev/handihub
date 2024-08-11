@@ -1,7 +1,6 @@
-package tech.nuqta.handihub.product.repository;
+package tech.nuqta.handihub.rating;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import tech.nuqta.handihub.product.entity.Rating;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
   }
