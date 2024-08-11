@@ -2,6 +2,8 @@ package tech.nuqta.handihub.product.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
+import tech.nuqta.handihub.file.ImageUploadService;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
@@ -19,6 +22,7 @@ import tech.nuqta.handihub.product.service.ProductsService;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductsService productsService;
+    private final ImageUploadService imageUploadService;
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('VENDOR')")
@@ -41,6 +45,13 @@ public class ProductController {
         return ResponseEntity.ok(productsService.addImages(id, images, authentication));
     }
 
+    @GetMapping("/images/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+        Resource file = imageUploadService.loadAsResource(filename);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyAuthority('VENDOR', 'ADMIN')")
