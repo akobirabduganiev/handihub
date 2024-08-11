@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 
 @RestController
@@ -20,9 +21,15 @@ public class RatingController {
         return ResponseEntity.ok(ratingService.rateProduct(request, connectedUser));
     }
 
-    @GetMapping("/{id}/rating")
-    public ResponseEntity<Double> getProductRating(@PathVariable Long id) {
-        return ResponseEntity.ok(ratingService.getProductRating(id));
+    @GetMapping("/{productId}/rating")
+    public ResponseEntity<Double> getAverageRating(@PathVariable Long productId) {
+        return ResponseEntity.ok(ratingService.getAverageRating(productId));
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<PageResponse<RatingDto>> getRatings(@RequestParam(defaultValue = "1") int page,
+                                                              @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ratingService.getRatings(page, size));
     }
 
 }

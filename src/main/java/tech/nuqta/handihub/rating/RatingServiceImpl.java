@@ -2,10 +2,15 @@ package tech.nuqta.handihub.rating;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
+import tech.nuqta.handihub.mapper.RatingMapper;
 import tech.nuqta.handihub.product.repository.ProductsRepository;
 import tech.nuqta.handihub.user.entity.User;
 
@@ -31,10 +36,25 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public Double getProductRating(Long id) {
-        var product = productsRepository.findById(id)
+    public Double getAverageRating(Long productId) {
+        var product = productsRepository.findById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
         return product.getAverageRating();
+    }
+
+    @Override
+    public PageResponse<RatingDto> getRatings(int page, int size) {
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
+        var ratings = ratingRepository.findAll(pageable);
+        return new PageResponse<>(
+                RatingMapper.toDtoList(ratings.getContent()),
+                ratings.getNumber() + 1,
+                ratings.getSize(),
+                ratings.getTotalElements(),
+                ratings.getTotalPages(),
+                ratings.isFirst(),
+                ratings.isLast()
+        );
     }
 
 }
