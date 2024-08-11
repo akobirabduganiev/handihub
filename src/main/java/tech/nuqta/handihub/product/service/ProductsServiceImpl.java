@@ -8,11 +8,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tech.nuqta.handihub.category.entity.CategoryEntity;
 import tech.nuqta.handihub.category.repository.CategoryRepository;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
+import tech.nuqta.handihub.file.ImageUploadService;
 import tech.nuqta.handihub.mapper.ProductMapper;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
@@ -32,6 +34,8 @@ public class ProductsServiceImpl implements ProductsService {
     private final ProductsRepository productsRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ImageUploadService imageUploadService;
+
 
     @Override
     public ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser) {
@@ -103,6 +107,26 @@ public class ProductsServiceImpl implements ProductsService {
                 products.isFirst(),
                 products.isLast()
         );
+    }
+
+    @Override
+    public ResponseMessage addImages(Long productId, MultipartFile[] images, Authentication connectedUser) {
+        var currentUser = (User) connectedUser.getPrincipal();
+        var product = productsRepository.findById(productId)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        if (!product.getUser().getId().equals(currentUser.getId())) {
+            return new ResponseMessage("You are not authorized to add images to this product");
+        }
+
+        for (MultipartFile image : images) {
+            String filename = imageUploadService.store(image);
+            product.getImages().add(filename);
+        }
+
+        productsRepository.save(product);
+        log.info("Images added to product with id {} by user with id {}", productId, currentUser.getId());
+        return new ResponseMessage("Images added successfully");
     }
 
 

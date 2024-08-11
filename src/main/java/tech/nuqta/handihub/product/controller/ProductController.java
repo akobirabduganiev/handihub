@@ -6,12 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.product.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
-import tech.nuqta.handihub.rating.RateRequest;
 import tech.nuqta.handihub.product.service.ProductsService;
 
 @RestController
@@ -31,6 +31,16 @@ public class ProductController {
     public ResponseEntity<ResponseMessage> updateProduct(@RequestBody @Valid ProductUpdateRequest request, Authentication connectedUser) {
         return ResponseEntity.ok(productsService.updateProduct(request, connectedUser));
     }
+
+    @PostMapping("/{id}/images")
+    @PreAuthorize("hasAuthority('VENDOR')")
+    public ResponseEntity<ResponseMessage> addImages(
+            @PathVariable Long id,
+            @RequestParam("images") MultipartFile[] images,
+            Authentication authentication) {
+        return ResponseEntity.ok(productsService.addImages(id, images, authentication));
+    }
+
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyAuthority('VENDOR', 'ADMIN')")
