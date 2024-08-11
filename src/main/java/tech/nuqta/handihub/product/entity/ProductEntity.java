@@ -1,4 +1,5 @@
 package tech.nuqta.handihub.product.entity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,4 +37,27 @@ public class ProductEntity extends BaseEntity {
     private User user;
     @ManyToOne(fetch = FetchType.LAZY)
     private CategoryEntity category;
+    @OneToMany(mappedBy = "product",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Rating> ratings;
+    private double averageRating;
+    private int ratingCount;
+
+    public void updateRating(int newRating) {
+        double totalRating = this.averageRating * this.ratingCount + newRating;
+        this.ratingCount++;
+        this.averageRating = totalRating / this.ratingCount;
+    }
+
+    public void updateRatingOnDelete(int ratingToRemove) {
+        if (this.ratingCount > 1) {
+            double totalRating = this.averageRating * this.ratingCount - ratingToRemove;
+            this.ratingCount--;
+            this.averageRating = totalRating / this.ratingCount;
+        } else {
+            this.ratingCount = 0;
+            this.averageRating = 0.0;
+        }
+    }
 }
