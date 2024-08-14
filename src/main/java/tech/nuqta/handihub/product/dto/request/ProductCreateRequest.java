@@ -9,13 +9,15 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.math.BigDecimal;
+
 public record ProductCreateRequest(
         @NotNull(message = "User ID is required") Long userId,
         @NotNull(message = "Category ID is required") Long categoryId,
         @NotNull(message = "Name is required") String name,
         @NotNull(message = "Description is required") String description,
         @NotNull(message = "Price is required")
-        @Positive(message = "Price must be greater than 0") Double price,
+        @Positive(message = "Price must be greater than 0") BigDecimal price,
         @NotNull(message = "Quantity is required")
         @Positive(message = "Quantity must be greater than 0") Integer quantity,
         String sku,
@@ -26,4 +28,5 @@ public record ProductCreateRequest(
         boolean isFeatured,
         boolean isHandmade,
         boolean madeToOrder
-) {}
+) {
+}

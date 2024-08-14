@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
+
 public record ProductUpdateRequest(
         @NotNull(message = "Product ID is required")
         Long id,
@@ -31,7 +33,7 @@ public record ProductUpdateRequest(
         Boolean madeToOrder,
         @NotNull(message = "Product price is required")
         @Positive(message = "Product price must be greater than 0")
-        Double price,
+        BigDecimal price,
         @NotNull(message = "Product quantity is required")
         @Positive(message = "Product quantity must be greater than 0")
 

@@ -1,6 +1,7 @@
 package tech.nuqta.handihub.product.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public record ProductDTO(
         boolean isHandmade,
         boolean madeToOrder,
         List<String> images,
-        Double price,
+        BigDecimal price,
         Integer quantity,
         Long userId,
         Long categoryId
