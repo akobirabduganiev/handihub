@@ -63,7 +63,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public ResponseMessage getCart(Authentication authentication) {
-        return null;
+        var user = (User) authentication.getPrincipal();
+        var cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        return new ResponseMessage(cartEntity, "Cart retrieved successfully");
     }
 
     @Override
