@@ -79,7 +79,7 @@ public class CartServiceImpl implements CartService {
         var cartEntity = cartRepository.findByUserId(user)
                 .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
 
-        var product = productsRepository.findById(productId)
+        productsRepository.findById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         var existingProductOpt = cartEntity.getProducts().stream()
