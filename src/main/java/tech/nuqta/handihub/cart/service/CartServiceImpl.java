@@ -12,7 +12,6 @@ import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.enums.CartStatus;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.mapper.CartMapper;
-import tech.nuqta.handihub.product.entity.ProductEntity;
 import tech.nuqta.handihub.product.repository.ProductsRepository;
 import tech.nuqta.handihub.user.entity.User;
 import tech.nuqta.handihub.user.repository.UserRepository;
@@ -76,11 +75,37 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public ResponseMessage deleteProductFromCart(Long productId, Authentication authentication) {
-        return null;
+        var user = (User) authentication.getPrincipal();
+        var cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+
+        var product = productsRepository.findById(productId)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        var existingProductOpt = cartEntity.getProducts().stream()
+                .filter(cartProduct -> cartProduct.getId().equals(productId))
+                .findFirst();
+
+        if (existingProductOpt.isPresent()) {
+            var existingProduct = existingProductOpt.get();
+            cartEntity.setTotalQuantity(cartEntity.getTotalQuantity() - 1);
+            cartEntity.setTotalPrice(cartEntity.getTotalPrice().subtract(existingProduct.getPrice()));
+            cartEntity.getProducts().remove(existingProduct);
+        }
+
+        cartRepository.save(cartEntity);
+        CartDto cartDto = cartMapper.toCartDto(cartEntity);
+        return new ResponseMessage(cartDto, "Product deleted from cart successfully");
     }
 
     @Override
     public ResponseMessage checkoutCart(Authentication authentication) {
-        return null;
+        var user = (User) authentication.getPrincipal();
+        var cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+
+        cartEntity.setStatus(CartStatus.CHECKOUT);
+        cartRepository.save(cartEntity);
+        return new ResponseMessage("Cart checked out successfully");
     }
 }
