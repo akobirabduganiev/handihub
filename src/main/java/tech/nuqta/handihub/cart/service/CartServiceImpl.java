@@ -14,7 +14,6 @@ import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.mapper.CartMapper;
 import tech.nuqta.handihub.product.repository.ProductsRepository;
 import tech.nuqta.handihub.user.entity.User;
-import tech.nuqta.handihub.user.repository.UserRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 @Slf4j
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
     private final ProductsRepository productsRepository;
     private final CartMapper cartMapper = CartMapper.INSTANCE;
 
