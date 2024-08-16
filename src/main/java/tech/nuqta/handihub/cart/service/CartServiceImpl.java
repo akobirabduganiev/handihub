@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import tech.nuqta.handihub.cart.dto.CartDto;
 import tech.nuqta.handihub.cart.dto.CartItem;
 import tech.nuqta.handihub.cart.entity.CartEntity;
 import tech.nuqta.handihub.cart.repository.CartRepository;
@@ -24,28 +23,70 @@ import java.util.ArrayList;
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductsRepository productsRepository;
-    private final CartMapper cartMapper = CartMapper.INSTANCE;
 
     @Override
     public ResponseMessage addOrUpdateCart(CartItem cartItem, Authentication authentication) {
         var user = (User) authentication.getPrincipal();
+        var cartEntity = retrieveOrCreateCart(user);
+        updateCartDetails(cartEntity, cartItem);
+        cartRepository.save(cartEntity);
+        var cartDto = CartMapper.toCartDto(cartEntity);
+        return new ResponseMessage(cartDto, "Cart created/updated successfully");
+    }
 
-        var cartEntity = cartRepository.findByUserId(user).orElseGet(() -> {
-            var newCart = new CartEntity();
+    @Override
+    public ResponseMessage getCart(Authentication authentication) {
+        var user = (User) authentication.getPrincipal();
+        var cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        var cartDto = CartMapper.toCartDto(cartEntity);
+        return new ResponseMessage(cartDto, "Cart retrieved successfully");
+    }
+
+    @Override
+    public ResponseMessage deleteProductFromCart(Long productId, Authentication authentication) {
+        var user = (User) authentication.getPrincipal();
+        var cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        var product = productsRepository.findById(productId)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+        cartEntity.getProducts().removeIf(cartProduct -> cartProduct.getId().equals(productId));
+        cartEntity.setTotalQuantity(cartEntity.getTotalQuantity() - 1);
+        cartEntity.setTotalPrice(cartEntity.getTotalPrice().subtract(product.getPrice()));
+        cartRepository.save(cartEntity);
+        var cartDto = CartMapper.toCartDto(cartEntity);
+        return new ResponseMessage(cartDto, "Product deleted from cart successfully");
+    }
+
+    @Override
+    public ResponseMessage checkoutCart(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        CartEntity cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        cartEntity.setStatus(CartStatus.CHECKOUT);
+        cartRepository.save(cartEntity);
+        return new ResponseMessage("Cart checked out successfully");
+    }
+
+    private CartEntity retrieveOrCreateCart(User user) {
+        return cartRepository.findByUserId(user).orElseGet(() -> {
+            CartEntity newCart = new CartEntity();
             newCart.setUser(user);
             newCart.setStatus(CartStatus.ACTIVE);
             newCart.setProducts(new ArrayList<>());
+            newCart.setTotalPrice(BigDecimal.ZERO);
+            newCart.setTotalQuantity(0);
             return newCart;
         });
+    }
 
+    private void updateCartDetails(CartEntity cartEntity, CartItem cartItem) {
         var product = productsRepository.findById(cartItem.productId())
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-
-        var existingProductOpt = cartEntity.getProducts().stream()
+        var existingProduct = cartEntity.getProducts().stream()
                 .filter(cartProduct -> cartProduct.getId().equals(cartItem.productId()))
                 .findFirst();
-
-        if (existingProductOpt.isPresent()) {
+        if (existingProduct.isPresent()) {
             cartEntity.setTotalQuantity(cartEntity.getTotalQuantity() + cartItem.quantity());
             cartEntity.setTotalPrice(cartEntity.getTotalPrice()
                     .add(product.getPrice().multiply(BigDecimal.valueOf(cartItem.quantity()))));
@@ -55,55 +96,5 @@ public class CartServiceImpl implements CartService {
             cartEntity.setTotalPrice(cartEntity.getTotalPrice()
                     .add(product.getPrice().multiply(BigDecimal.valueOf(cartItem.quantity()))));
         }
-
-        cartRepository.save(cartEntity);
-        CartDto cartDto = cartMapper.toCartDto(cartEntity);
-        return new ResponseMessage(cartDto, "Cart created/updated successfully");
-    }
-
-    @Override
-    public ResponseMessage getCart(Authentication authentication) {
-        var user = (User) authentication.getPrincipal();
-        var cartEntity = cartRepository.findByUserId(user)
-                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
-
-        CartDto cartDto = cartMapper.toCartDto(cartEntity);
-        return new ResponseMessage(cartDto, "Cart retrieved successfully");
-    }
-
-    @Override
-    public ResponseMessage deleteProductFromCart(Long productId, Authentication authentication) {
-        var user = (User) authentication.getPrincipal();
-        var cartEntity = cartRepository.findByUserId(user)
-                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
-
-        productsRepository.findById(productId)
-                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-
-        var existingProductOpt = cartEntity.getProducts().stream()
-                .filter(cartProduct -> cartProduct.getId().equals(productId))
-                .findFirst();
-
-        if (existingProductOpt.isPresent()) {
-            var existingProduct = existingProductOpt.get();
-            cartEntity.setTotalQuantity(cartEntity.getTotalQuantity() - 1);
-            cartEntity.setTotalPrice(cartEntity.getTotalPrice().subtract(existingProduct.getPrice()));
-            cartEntity.getProducts().remove(existingProduct);
-        }
-
-        cartRepository.save(cartEntity);
-        CartDto cartDto = cartMapper.toCartDto(cartEntity);
-        return new ResponseMessage(cartDto, "Product deleted from cart successfully");
-    }
-
-    @Override
-    public ResponseMessage checkoutCart(Authentication authentication) {
-        var user = (User) authentication.getPrincipal();
-        var cartEntity = cartRepository.findByUserId(user)
-                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
-
-        cartEntity.setStatus(CartStatus.CHECKOUT);
-        cartRepository.save(cartEntity);
-        return new ResponseMessage("Cart checked out successfully");
     }
 }

@@ -27,6 +27,7 @@ public class ResponseMessage {
     private final Long timestamp = System.currentTimeMillis();
     private String message;
     private Object data;
+
     public ResponseMessage(String message) {
         this.message = message;
     }
