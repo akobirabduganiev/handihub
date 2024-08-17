@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import tech.nuqta.handihub.cart.dto.CartDto;
 import tech.nuqta.handihub.cart.dto.CartItem;
 import tech.nuqta.handihub.cart.entity.CartEntity;
 import tech.nuqta.handihub.cart.repository.CartRepository;
@@ -16,6 +17,7 @@ import tech.nuqta.handihub.user.entity.User;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +68,25 @@ public class CartServiceImpl implements CartService {
         cartEntity.setStatus(CartStatus.CHECKOUT);
         cartRepository.save(cartEntity);
         return new ResponseMessage("Cart checked out successfully");
+    }
+
+    @Override
+    public ResponseMessage clearCart(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        CartEntity cartEntity = cartRepository.findByUserId(user)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        cartEntity.getProducts().clear();
+        cartEntity.setTotalQuantity(0);
+        cartEntity.setTotalPrice(BigDecimal.ZERO);
+        cartEntity.setStatus(CartStatus.ACTIVE);
+        cartRepository.save(cartEntity);
+        return new ResponseMessage("Cart cleared successfully");
+    }
+
+    @Override
+    public List<CartDto> getCheckedOutCarts(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return CartMapper.toCartDtoList(cartRepository.findAllCheckedOutCarts(user));
     }
 
     private CartEntity retrieveOrCreateCart(User user) {
