@@ -12,6 +12,8 @@ import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.enums.CartStatus;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.mapper.CartMapper;
+import tech.nuqta.handihub.order.entity.OrderEntity;
+import tech.nuqta.handihub.order.service.OrderService;
 import tech.nuqta.handihub.product.repository.ProductsRepository;
 import tech.nuqta.handihub.user.entity.User;
 
@@ -25,6 +27,7 @@ import java.util.List;
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductsRepository productsRepository;
+    private final OrderService orderService;
 
     @Override
     public ResponseMessage addOrUpdateCart(CartItem cartItem, Authentication authentication) {
@@ -65,6 +68,12 @@ public class CartServiceImpl implements CartService {
         User user = (User) authentication.getPrincipal();
         CartEntity cartEntity = cartRepository.findByUserId(user)
                 .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+        if (cartEntity.getProducts().isEmpty()) {
+            throw new ItemNotFoundException("Cart is empty");
+        }
+        OrderEntity order = orderService.createOrderFromCart(cartEntity);
+
+
         cartEntity.setStatus(CartStatus.CHECKOUT);
         cartRepository.save(cartEntity);
         return new ResponseMessage("Cart checked out successfully");
