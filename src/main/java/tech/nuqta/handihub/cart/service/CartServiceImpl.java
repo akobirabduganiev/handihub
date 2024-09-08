@@ -72,6 +72,11 @@ public class CartServiceImpl implements CartService {
             throw new ItemNotFoundException("Cart is empty");
         }
         OrderEntity order = orderService.createOrderFromCart(cartEntity);
+        // TODO send order confirmation email
+        // TODO Payment gateway integration
+        // TODO Update product quantity
+        // TODO Update cart status
+        // TODO Invoice generation
 
 
         cartEntity.setStatus(CartStatus.CHECKOUT);
