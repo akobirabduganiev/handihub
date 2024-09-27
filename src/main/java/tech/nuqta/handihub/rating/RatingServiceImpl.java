@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
+import tech.nuqta.handihub.dto.RatingDto;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.mapper.RatingMapper;
 import tech.nuqta.handihub.product.repository.ProductsRepository;

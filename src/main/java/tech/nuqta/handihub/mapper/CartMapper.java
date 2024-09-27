@@ -1,7 +1,7 @@
 package tech.nuqta.handihub.mapper;
 
-import tech.nuqta.handihub.cart.dto.CartDto;
-import tech.nuqta.handihub.cart.dto.CartItemDto;
+import tech.nuqta.handihub.dto.CartDto;
+import tech.nuqta.handihub.dto.CartItemDto;
 import tech.nuqta.handihub.cart.entity.CartEntity;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package tech.nuqta.handihub.mapper;
 
-import tech.nuqta.handihub.category.dto.CategoryDto;
+import tech.nuqta.handihub.dto.CategoryDto;
 import tech.nuqta.handihub.category.entity.CategoryEntity;
 
 

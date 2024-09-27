@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.product.dto;
+package tech.nuqta.handihub.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

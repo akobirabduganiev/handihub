@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.user.controller;
+package tech.nuqta.handihub.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
-import tech.nuqta.handihub.user.dto.UserDto;
+import tech.nuqta.handihub.dto.UserDto;
 import tech.nuqta.handihub.user.dto.request.UserPasswordUpdateRequest;
 import tech.nuqta.handihub.user.dto.request.UserUpdateRequest;
 import tech.nuqta.handihub.user.service.UserService;

@@ -19,7 +19,7 @@ import tech.nuqta.handihub.exception.AppConflictException;
 import tech.nuqta.handihub.exception.OperationNotPermittedException;
 import tech.nuqta.handihub.mapper.UserMapper;
 import tech.nuqta.handihub.role.RoleRepository;
-import tech.nuqta.handihub.user.dto.UserDto;
+import tech.nuqta.handihub.dto.UserDto;
 import tech.nuqta.handihub.user.dto.request.UserPasswordUpdateRequest;
 import tech.nuqta.handihub.user.dto.request.UserUpdateRequest;
 import tech.nuqta.handihub.user.entity.User;

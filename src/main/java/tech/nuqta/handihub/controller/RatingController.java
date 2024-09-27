@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.rating;
+package tech.nuqta.handihub.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
+import tech.nuqta.handihub.rating.RateRequest;
+import tech.nuqta.handihub.dto.RatingDto;
+import tech.nuqta.handihub.rating.RatingService;
 
 @RestController
 @RequestMapping("/api/v1/rating")

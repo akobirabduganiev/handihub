@@ -4,10 +4,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
-import tech.nuqta.handihub.product.dto.ProductDTO;
+import tech.nuqta.handihub.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
-import tech.nuqta.handihub.rating.RateRequest;
 
 public interface ProductsService {
     ResponseMessage addProduct(ProductCreateRequest request, Authentication connectedUser);

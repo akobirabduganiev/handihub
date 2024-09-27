@@ -16,7 +16,7 @@ import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.exception.ItemNotFoundException;
 import tech.nuqta.handihub.file.ImageUploadService;
 import tech.nuqta.handihub.mapper.ProductMapper;
-import tech.nuqta.handihub.product.dto.ProductDTO;
+import tech.nuqta.handihub.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
 import tech.nuqta.handihub.product.entity.ProductEntity;

@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.auth
+package tech.nuqta.handihub.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.mail.MessagingException
@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import tech.nuqta.handihub.auth.AuthenticationRequest
+import tech.nuqta.handihub.auth.AuthenticationResponse
+import tech.nuqta.handihub.auth.AuthenticationService
+import tech.nuqta.handihub.auth.RegistrationRequest
 import tech.nuqta.handihub.common.ResponseMessage
 
 /**

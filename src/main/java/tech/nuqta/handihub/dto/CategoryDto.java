@@ -1,7 +1,5 @@
-package tech.nuqta.handihub.category.dto;
+package tech.nuqta.handihub.dto;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**

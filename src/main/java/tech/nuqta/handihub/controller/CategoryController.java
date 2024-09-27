@@ -1,11 +1,11 @@
-package tech.nuqta.handihub.category.controller;
+package tech.nuqta.handihub.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tech.nuqta.handihub.category.dto.CategoryDto;
+import tech.nuqta.handihub.dto.CategoryDto;
 import tech.nuqta.handihub.category.dto.request.CategoryCreateRequest;
 import tech.nuqta.handihub.category.dto.request.CategoryUpdateRequest;
 import tech.nuqta.handihub.category.service.CategoryService;

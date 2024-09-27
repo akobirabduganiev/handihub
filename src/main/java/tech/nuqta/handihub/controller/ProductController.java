@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.product.controller;
+package tech.nuqta.handihub.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
 import tech.nuqta.handihub.file.ImageUploadService;
-import tech.nuqta.handihub.product.dto.ProductDTO;
+import tech.nuqta.handihub.dto.ProductDTO;
 import tech.nuqta.handihub.product.dto.request.ProductCreateRequest;
 import tech.nuqta.handihub.product.dto.request.ProductUpdateRequest;
 import tech.nuqta.handihub.product.service.ProductsService;

@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.user.dto;
+package tech.nuqta.handihub.dto;
 
 import tech.nuqta.handihub.enums.Gender;
 

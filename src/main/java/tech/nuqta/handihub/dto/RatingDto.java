@@ -1,6 +1,7 @@
-package tech.nuqta.handihub.rating;
+package tech.nuqta.handihub.dto;
 
 import lombok.Value;
+import tech.nuqta.handihub.rating.Rating;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package tech.nuqta.handihub.cart.dto;
+package tech.nuqta.handihub.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

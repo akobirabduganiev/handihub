@@ -1,6 +1,6 @@
 package tech.nuqta.handihub.category.service;
 
-import tech.nuqta.handihub.category.dto.CategoryDto;
+import tech.nuqta.handihub.dto.CategoryDto;
 import tech.nuqta.handihub.category.dto.request.CategoryCreateRequest;
 import tech.nuqta.handihub.category.dto.request.CategoryUpdateRequest;
 import tech.nuqta.handihub.common.ResponseMessage;

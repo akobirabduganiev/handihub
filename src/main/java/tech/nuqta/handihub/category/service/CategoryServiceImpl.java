@@ -5,7 +5,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import tech.nuqta.handihub.category.dto.CategoryDto;
+import tech.nuqta.handihub.dto.CategoryDto;
 import tech.nuqta.handihub.category.dto.request.CategoryCreateRequest;
 import tech.nuqta.handihub.category.dto.request.CategoryUpdateRequest;
 import tech.nuqta.handihub.category.entity.CategoryEntity;

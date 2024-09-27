@@ -3,7 +3,7 @@ package tech.nuqta.handihub.user.service;
 import org.springframework.security.core.Authentication;
 import tech.nuqta.handihub.common.PageResponse;
 import tech.nuqta.handihub.common.ResponseMessage;
-import tech.nuqta.handihub.user.dto.UserDto;
+import tech.nuqta.handihub.dto.UserDto;
 import tech.nuqta.handihub.user.dto.request.UserPasswordUpdateRequest;
 import tech.nuqta.handihub.user.dto.request.UserUpdateRequest;
 

@@ -1,7 +1,7 @@
 package tech.nuqta.handihub.mapper;
 
 import tech.nuqta.handihub.rating.Rating;
-import tech.nuqta.handihub.rating.RatingDto;
+import tech.nuqta.handihub.dto.RatingDto;
 
 import java.util.List;
 

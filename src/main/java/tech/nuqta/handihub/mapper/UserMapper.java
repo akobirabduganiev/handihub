@@ -1,6 +1,6 @@
 package tech.nuqta.handihub.mapper;
 
-import tech.nuqta.handihub.user.dto.UserDto;
+import tech.nuqta.handihub.dto.UserDto;
 import tech.nuqta.handihub.user.entity.User;
 
 import java.util.Arrays;
